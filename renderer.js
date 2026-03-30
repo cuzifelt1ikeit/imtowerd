@@ -1,6 +1,7 @@
 // 2D Canvas renderer for the TD grid
 
 import { CELL_EMPTY, CELL_BUNKER, CELL_SPAWN, CELL_EXIT } from './grid.js';
+import { ENEMY_TYPES } from './enemies.js';
 
 const COLORS = {
   background: '#1a1a2e',
@@ -17,6 +18,9 @@ const COLORS = {
   validPlace: 'rgba(76, 175, 80, 0.3)',
   invalidPlace: 'rgba(255, 50, 50, 0.3)',
   hover: 'rgba(255, 255, 255, 0.15)',
+  hpBarBg: 'rgba(0, 0, 0, 0.5)',
+  hpBarFill: '#2ecc71',
+  hpBarLow: '#e74c3c',
 };
 
 export class Renderer {
@@ -42,6 +46,9 @@ export class Renderer {
 
     // Current path to display
     this.currentPath = null;
+
+    // Enemies reference
+    this.enemies = [];
 
     this.resize();
   }
@@ -203,6 +210,44 @@ export class Renderer {
 
       ctx.fillStyle = canPlace ? COLORS.validPlace : COLORS.invalidPlace;
       ctx.fillRect(x + p, y + p, cs - p * 2, cs - p * 2);
+    }
+
+    // Draw enemies
+    for (const enemy of this.enemies) {
+      if (!enemy.alive) continue;
+
+      const ex = this.offsetX + enemy.x * cs + cs / 2;
+      const ey = enemy.y * cs + cs / 2;
+
+      // Skip if off screen
+      if (ey + cs < this.scrollY - cs || ey - cs > this.scrollY + this.viewHeight + cs) continue;
+
+      const typeDef = ENEMY_TYPES[enemy.type] || ENEMY_TYPES.grunt;
+      const radius = (cs * typeDef.size) / 2;
+
+      // Enemy body
+      ctx.beginPath();
+      ctx.arc(ex, ey, radius, 0, Math.PI * 2);
+      ctx.fillStyle = typeDef.color;
+      ctx.fill();
+      ctx.strokeStyle = 'rgba(0,0,0,0.4)';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      // HP bar
+      const barWidth = cs * 0.8;
+      const barHeight = 4;
+      const barX = ex - barWidth / 2;
+      const barY = ey - radius - 8;
+      const hpRatio = enemy.hp / enemy.maxHp;
+
+      // Background
+      ctx.fillStyle = COLORS.hpBarBg;
+      ctx.fillRect(barX, barY, barWidth, barHeight);
+
+      // Fill
+      ctx.fillStyle = hpRatio > 0.3 ? COLORS.hpBarFill : COLORS.hpBarLow;
+      ctx.fillRect(barX, barY, barWidth * hpRatio, barHeight);
     }
 
     ctx.restore();
