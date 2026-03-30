@@ -17,9 +17,57 @@
   </div>
   <canvas id="game"></canvas>
   <div id="bottom-bar">
+    <button id="help-btn">❓ How to Play</button>
     <button id="send-btn" style="display:none;">⚡ Send Early</button>
     <button id="build-btn">🔨 Build Mode</button>
   </div>
-  <script type="module" src="game.js?v=6"></script>
+
+  <div id="help-overlay" style="display:none;">
+    <div id="help-content">
+      <h2>🏰 Impossible Tower Defense</h2>
+      <div class="help-section">
+        <h3>🎯 Goal</h3>
+        <p>Stop enemies from reaching the <span style="color:#ff6b6b;">red exit row</span> at the bottom. If too many leak through, you lose!</p>
+      </div>
+      <div class="help-section">
+        <h3>🔨 Building</h3>
+        <p>Tap <b>Build Mode</b>, then tap empty cells to place bunkers (<span style="color:#f0c040;">$50</span> each). Bunkers block enemies and create a maze — but you can't fully block the path.</p>
+      </div>
+      <div class="help-section">
+        <h3>👥 Units</h3>
+        <p>Tap a bunker to open it. Add units inside to attack enemies:</p>
+        <ul>
+          <li><span style="color:#3498db;">MG</span> — Fast, steady damage</li>
+          <li><span style="color:#f39c12;">Shotgun</span> — Splash damage, short range</li>
+          <li><span style="color:#e74c3c;">Flamethrower</span> — AOE + burn DOT</li>
+          <li><span style="color:#2ecc71;">Sniper</span> — Huge damage, long range, slow</li>
+        </ul>
+        <p>Units can be upgraded to Tier 5 for more damage, range, and fire rate.</p>
+      </div>
+      <div class="help-section">
+        <h3>👾 Enemies</h3>
+        <ul>
+          <li><span style="color:#e74c3c;">Grunt</span> — Standard</li>
+          <li><span style="color:#f39c12;">Runner</span> — Fast, fragile</li>
+          <li><span style="color:#8e44ad;">Tank</span> — Slow, massive HP</li>
+          <li><span style="color:#e67e22;">Swarm</span> — Tiny, many</li>
+          <li><span style="color:#c0392b;">Boss</span> — Every 10 waves. Good luck.</li>
+        </ul>
+        <p>🧭 = follows optimal path &nbsp; <span style="color:#aaa;">?</span> = wanders randomly</p>
+      </div>
+      <div class="help-section">
+        <h3>⚡ Tips</h3>
+        <ul>
+          <li>Send waves early for bonus cash</li>
+          <li>Longer maze = more time for your units to shoot</li>
+          <li>Mix unit types for best coverage</li>
+          <li>Scroll to see the full grid</li>
+        </ul>
+      </div>
+      <button id="help-close-btn">Got it!</button>
+    </div>
+  </div>
+
+  <script type="module" src="game.js?v=7"></script>
 </body>
 </html>

@@ -104,3 +104,89 @@ canvas {
 #bottom-bar {
   gap: 10px;
 }
+
+#help-btn {
+  padding: 12px 24px;
+  font-size: 16px;
+  border: 2px solid #888;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.08);
+  color: #ccc;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+#help-btn:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+/* Help overlay */
+#help-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0, 0, 0, 0.85);
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+#help-content {
+  background: #1a1a2e;
+  border: 1px solid #444;
+  border-radius: 12px;
+  padding: 24px;
+  max-width: 420px;
+  width: 100%;
+  max-height: 80vh;
+  overflow-y: auto;
+  color: #ddd;
+  font-family: sans-serif;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+#help-content h2 {
+  text-align: center;
+  margin-bottom: 16px;
+  color: white;
+  font-size: 20px;
+}
+
+.help-section {
+  margin-bottom: 14px;
+}
+
+.help-section h3 {
+  color: #f0c040;
+  font-size: 15px;
+  margin-bottom: 4px;
+}
+
+.help-section ul {
+  padding-left: 18px;
+  margin: 4px 0;
+}
+
+.help-section li {
+  margin: 2px 0;
+}
+
+#help-close-btn {
+  display: block;
+  width: 100%;
+  padding: 12px;
+  margin-top: 16px;
+  font-size: 16px;
+  font-weight: bold;
+  border: 2px solid #4CAF50;
+  border-radius: 8px;
+  background: rgba(76, 175, 80, 0.2);
+  color: #4CAF50;
+  cursor: pointer;
+}
+
+#help-close-btn:hover {
+  background: rgba(76, 175, 80, 0.35);
+}

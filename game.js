@@ -36,6 +36,9 @@ renderer.effects = waveManager.effects;
 // These grab HTML elements so we can update their text/visibility from code.
 const buildBtn = document.getElementById('build-btn');
 const sendBtn = document.getElementById('send-btn');
+const helpBtn = document.getElementById('help-btn');
+const helpOverlay = document.getElementById('help-overlay');
+const helpCloseBtn = document.getElementById('help-close-btn');
 const cashEl = document.getElementById('cash');
 const hpEl = document.getElementById('hp');
 const waveNumEl = document.getElementById('wave-num');
@@ -45,6 +48,14 @@ const waveTimerEl = document.getElementById('wave-timer');
 renderer.buildMode = true;
 buildBtn.classList.add('active');
 buildBtn.textContent = '✅ Building...';
+
+// Help button — only visible before game starts
+helpBtn.addEventListener('click', () => {
+  helpOverlay.style.display = 'flex';
+});
+helpCloseBtn.addEventListener('click', () => {
+  helpOverlay.style.display = 'none';
+});
 
 // ── Game State ───────────────────────────────────────────────────
 // These variables track the current state of the game.
@@ -138,6 +149,8 @@ sendBtn.addEventListener('click', () => {
   if (gameOver) return;
   if (waveManager.waitingForPlayer) {
     waveManager.sendEarly(); // Starts the game
+    helpBtn.style.display = 'none';
+    helpOverlay.style.display = 'none';
     flashMessage('Wave 1 incoming!', '#4CAF50');
     return;
   }
