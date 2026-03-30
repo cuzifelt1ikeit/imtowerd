@@ -44,10 +44,8 @@ const hpEl = document.getElementById('hp');
 const waveNumEl = document.getElementById('wave-num');
 const waveTimerEl = document.getElementById('wave-timer');
 
-// Init build mode on load
-renderer.buildMode = true;
-buildBtn.classList.add('active');
-buildBtn.textContent = '✅ Building...';
+// Init build mode off — player learns to toggle it
+renderer.buildMode = false;
 
 // Help button — only visible before game starts
 helpBtn.addEventListener('click', () => {
@@ -60,7 +58,7 @@ helpCloseBtn.addEventListener('click', () => {
 // ── Game State ───────────────────────────────────────────────────
 // These variables track the current state of the game.
 // They change as the player builds, enemies die, etc.
-let buildMode = true; // Start in build mode so player can place immediately
+let buildMode = false;
 let cash = 500;
 let playerHp = 100;
 const MAX_HP = 100;
