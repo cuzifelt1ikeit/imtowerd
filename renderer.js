@@ -341,12 +341,11 @@ export class Renderer {
         ctx.setLineDash([]);
       }
 
-      // Wanderer indicator — small "?" above
+      // Wanderer indicator — ❓ above
       if (!enemy.isPathfinder) {
-        ctx.fillStyle = 'rgba(255,255,255,0.4)';
-        ctx.font = `${Math.max(8, cs * 0.15)}px sans-serif`;
+        ctx.font = `${Math.max(10, cs * 0.22)}px sans-serif`;
         ctx.textAlign = 'center';
-        ctx.fillText('?', ex, ey - radius - 10);
+        ctx.fillText('❓', ex, ey - radius - 8);
       }
 
       // HP bar
