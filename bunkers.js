@@ -56,15 +56,53 @@ export const UNIT_TYPES = {
   },
 };
 
+// Upgrade config
+export const MAX_TIER = 5;
+export const UPGRADE_MULTIPLIERS = {
+  // Per-tier multipliers (applied to base stats)
+  damage:   [1, 1.4, 1.9, 2.5, 3.2],  // T1-T5
+  fireRate: [1, 1.15, 1.3, 1.45, 1.6],
+  range:    [1, 1.1, 1.2, 1.3, 1.4],
+};
+
+// Upgrade cost = base unit cost * tier multiplier
+export function getUpgradeCost(unitType, currentTier) {
+  if (currentTier >= MAX_TIER) return Infinity;
+  const baseCost = UNIT_TYPES[unitType].cost;
+  const tierCostMultiplier = [0, 1.0, 1.5, 2.0, 2.5]; // cost to go FROM tier X to X+1
+  return Math.round(baseCost * tierCostMultiplier[currentTier]);
+}
+
 export class Unit {
   constructor(type) {
     const def = UNIT_TYPES[type];
     this.type = type;
+    this.baseDamage = def.damage;
+    this.baseFireRate = def.fireRate;
+    this.baseRange = def.range;
     this.damage = def.damage;
     this.fireRate = def.fireRate;
     this.range = def.range;
     this.tier = 1;
     this.fireCooldown = 0;
+  }
+
+  upgrade() {
+    if (this.tier >= MAX_TIER) return false;
+    this.tier++;
+    const ti = this.tier - 1; // 0-indexed
+    this.damage = Math.round(this.baseDamage * UPGRADE_MULTIPLIERS.damage[ti]);
+    this.fireRate = +(this.baseFireRate * UPGRADE_MULTIPLIERS.fireRate[ti]).toFixed(2);
+    this.range = +(this.baseRange * UPGRADE_MULTIPLIERS.range[ti]).toFixed(1);
+    return true;
+  }
+
+  canUpgrade() {
+    return this.tier < MAX_TIER;
+  }
+
+  getDPS() {
+    return +(this.damage * this.fireRate).toFixed(1);
   }
 
   update(dt) {

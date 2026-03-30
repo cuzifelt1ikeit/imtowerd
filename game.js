@@ -3,7 +3,7 @@
 import { Grid } from './grid.js';
 import { Renderer } from './renderer.js';
 import { WaveManager } from './enemies.js';
-import { BunkerManager, UNIT_TYPES } from './bunkers.js';
+import { BunkerManager, UNIT_TYPES, MAX_TIER, getUpgradeCost } from './bunkers.js';
 
 // Grid: 9 columns wide, 20 rows tall
 const GRID_COLS = 9;
@@ -32,6 +32,9 @@ const MAX_HP = 100;
 const BUNKER_COST = 50;
 let gameOver = false;
 let lastTime = performance.now();
+let totalKills = 0;
+let totalEarned = 0;
+let totalLeaked = 0;
 
 // Kill bounty - based on wave budget
 function getKillBounty(waveNum) {
@@ -64,6 +67,7 @@ waveManager.onEnemyEscaped = (enemy) => {
   const damage = LEAK_DAMAGE[enemy.type] || 1;
   playerHp = Math.max(0, playerHp - damage);
   hpEl.textContent = Math.round(playerHp);
+  totalLeaked++;
 
   if (playerHp <= 0 && !gameOver) {
     gameOver = true;
@@ -73,6 +77,8 @@ waveManager.onEnemyEscaped = (enemy) => {
 
 waveManager.onEnemyKilled = (enemy) => {
   cash += currentBounty;
+  totalEarned += currentBounty;
+  totalKills++;
   cashEl.textContent = cash;
   // Refresh garrison panel if open
   if (garrisonPanel && selectedBunkerPos) {
@@ -175,14 +181,38 @@ function renderGarrisonPanel(bunker) {
     <span style="float:right; cursor:pointer; font-size:20px;" id="close-panel">✕</span>
   </div>`;
 
-  // Current garrison
+  // Current garrison with upgrade buttons
   if (bunker.units.length > 0) {
     html += `<div style="margin-bottom:10px;">`;
-    for (const unit of bunker.units) {
+    for (let i = 0; i < bunker.units.length; i++) {
+      const unit = bunker.units[i];
       const def = UNIT_TYPES[unit.type];
-      html += `<span style="display:inline-block; background:${def.color}; color:#fff;
-        padding:3px 8px; border-radius:4px; margin:2px; font-size:13px;">
-        ${def.shortName} T${unit.tier}</span>`;
+      const upgCost = getUpgradeCost(unit.type, unit.tier);
+      const canUpgrade = unit.canUpgrade();
+      const canAffordUpg = cash >= upgCost;
+
+      html += `<div style="display:flex; align-items:center; gap:8px; margin:4px 0;
+        padding:6px 8px; background:rgba(255,255,255,0.05); border-radius:6px;
+        border-left: 3px solid ${def.color};">
+        <div style="flex:1;">
+          <span style="font-weight:bold; color:${def.color};">${def.shortName}</span>
+          <span style="color:#aaa; font-size:12px;">T${unit.tier}/${MAX_TIER}</span>
+          <div style="font-size:11px; color:#777; margin-top:2px;">
+            DMG:${unit.damage} · FR:${unit.fireRate}/s · RNG:${unit.range}
+            · <span style="color:#f0c040;">DPS:${unit.getDPS()}</span>
+          </div>
+        </div>
+        ${canUpgrade ? `
+          <button class="unit-upg-btn" data-index="${i}" style="
+            padding:4px 10px; border-radius:4px; font-size:11px;
+            border:1px solid ${canAffordUpg ? '#4CAF50' : '#444'};
+            background:${canAffordUpg ? 'rgba(76,175,80,0.2)' : 'rgba(255,255,255,0.03)'};
+            color:${canAffordUpg ? '#4CAF50' : '#666'};
+            cursor:${canAffordUpg ? 'pointer' : 'not-allowed'};
+            white-space:nowrap;
+          ">⬆ $${upgCost}</button>
+        ` : `<span style="font-size:11px; color:#4CAF50;">MAX</span>`}
+      </div>`;
     }
     html += `</div>`;
   } else {
@@ -208,10 +238,12 @@ function renderGarrisonPanel(bunker) {
     html += `</div>`;
   }
 
-  // Stats
+  // Bunker total stats
   if (bunker.units.length > 0) {
-    html += `<div style="margin-top:10px; font-size:11px; color:#888;">
-      Range: ${bunker.getMaxRange()} cells
+    const totalDPS = bunker.units.reduce((sum, u) => sum + u.getDPS(), 0).toFixed(1);
+    html += `<div style="margin-top:8px; font-size:11px; color:#888; display:flex; justify-content:space-between;">
+      <span>Range: ${bunker.getMaxRange()} cells</span>
+      <span style="color:#f0c040;">Total DPS: ${totalDPS}</span>
     </div>`;
   }
 
@@ -233,6 +265,26 @@ function renderGarrisonPanel(bunker) {
 
       bunker.addUnit(type);
       cash -= def.cost;
+      cashEl.textContent = cash;
+      renderGarrisonPanel(bunker);
+    });
+  });
+
+  // Upgrade buttons
+  garrisonPanel.querySelectorAll('.unit-upg-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const idx = parseInt(btn.dataset.index);
+      const unit = bunker.units[idx];
+      if (!unit || !unit.canUpgrade()) return;
+
+      const cost = getUpgradeCost(unit.type, unit.tier);
+      if (cash < cost) {
+        flashMessage('Not enough cash!');
+        return;
+      }
+
+      unit.upgrade();
+      cash -= cost;
       cashEl.textContent = cash;
       renderGarrisonPanel(bunker);
     });
@@ -263,10 +315,21 @@ function showGameOver() {
     `;
     document.body.appendChild(el);
   }
+  const bunkerCount = bunkerManager.getAllBunkers().length;
+  const unitCount = bunkerManager.getAllBunkers().reduce((s, b) => s + b.units.length, 0);
+
   el.innerHTML = `
     <h1 style="font-size: 48px; color: #e74c3c; margin-bottom: 16px;">GAME OVER</h1>
-    <p style="font-size: 24px; margin-bottom: 8px;">You reached Wave ${waveManager.waveNumber}</p>
-    <p style="font-size: 18px; color: #aaa;">Refresh to play again</p>
+    <p style="font-size: 28px; margin-bottom: 20px;">Wave ${waveManager.waveNumber}</p>
+    <div style="background:rgba(255,255,255,0.05); padding:16px 24px; border-radius:10px;
+      text-align:left; font-size:16px; line-height:2; min-width:250px;">
+      <div>🎯 Kills: <span style="color:#4CAF50; float:right;">${totalKills}</span></div>
+      <div>💀 Leaked: <span style="color:#e74c3c; float:right;">${totalLeaked}</span></div>
+      <div>💰 Earned: <span style="color:#f0c040; float:right;">$${totalEarned}</span></div>
+      <div>🏰 Bunkers: <span style="color:#aaa; float:right;">${bunkerCount}</span></div>
+      <div>👥 Units: <span style="color:#aaa; float:right;">${unitCount}</span></div>
+    </div>
+    <p style="font-size: 16px; color: #666; margin-top:20px;">Refresh to play again</p>
   `;
 }
 
