@@ -102,7 +102,20 @@ canvas {
 }
 
 #bottom-bar {
-  gap: 10px;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 480px) {
+  #bottom-bar {
+    padding: 6px 8px;
+    padding-bottom: calc(6px + env(safe-area-inset-bottom, 0px));
+    gap: 6px;
+  }
+  #build-btn, #send-btn, #help-btn {
+    padding: 8px 14px;
+    font-size: 14px;
+  }
 }
 
 #help-btn {

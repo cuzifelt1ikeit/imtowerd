@@ -151,6 +151,7 @@ sendBtn.addEventListener('click', () => {
     waveManager.sendEarly(); // Starts the game
     helpBtn.style.display = 'none';
     helpOverlay.style.display = 'none';
+    renderer.resize(); // Recalculate viewport now that help button is gone
     flashMessage('Wave 1 incoming!', '#4CAF50');
     return;
   }
