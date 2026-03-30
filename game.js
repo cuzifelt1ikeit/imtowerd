@@ -31,9 +31,6 @@ const bunkerManager = new BunkerManager();              // Manages all bunkers
 // Connect systems so the renderer can draw bunkers and effects
 renderer.bunkerManager = bunkerManager;
 renderer.effects = waveManager.effects;
-renderer.buildMode = true;
-buildBtn.classList.add('active');
-buildBtn.textContent = '✅ Building...';
 
 // ── UI Element References ────────────────────────────────────────
 // These grab HTML elements so we can update their text/visibility from code.
@@ -43,6 +40,11 @@ const cashEl = document.getElementById('cash');
 const hpEl = document.getElementById('hp');
 const waveNumEl = document.getElementById('wave-num');
 const waveTimerEl = document.getElementById('wave-timer');
+
+// Init build mode on load
+renderer.buildMode = true;
+buildBtn.classList.add('active');
+buildBtn.textContent = '✅ Building...';
 
 // ── Game State ───────────────────────────────────────────────────
 // These variables track the current state of the game.
