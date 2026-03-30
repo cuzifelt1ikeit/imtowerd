@@ -85,11 +85,14 @@ export class Renderer {
   resize() {
     const dpr = window.devicePixelRatio || 1;
     const rect = this.canvas.getBoundingClientRect();
+    // Account for fixed bottom bar overlapping the canvas
+    const bottomBar = document.getElementById('bottom-bar');
+    const barHeight = bottomBar ? bottomBar.offsetHeight : 0;
     this.canvas.width = rect.width * dpr;
     this.canvas.height = rect.height * dpr;
     this.ctx.scale(dpr, dpr);
     this.viewWidth = rect.width;
-    this.viewHeight = rect.height;
+    this.viewHeight = rect.height - barHeight;
 
     // Calculate cell size to fit grid width with some margin
     const margin = 16;

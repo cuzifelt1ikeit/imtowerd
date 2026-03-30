@@ -50,7 +50,6 @@ canvas {
   flex: 1;
   display: block;
   cursor: pointer;
-  padding-bottom: 60px; /* space for fixed bottom bar */
 }
 
 #bottom-bar {
