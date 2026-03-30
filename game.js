@@ -1,10 +1,11 @@
-// Impossible Tower Defense - Phase 2: Enemies + Waves
+// Impossible Tower Defense - Phase 3: Bunkers Shoot
 
 import { Grid } from './grid.js';
 import { Renderer } from './renderer.js';
 import { WaveManager } from './enemies.js';
+import { BunkerManager, UNIT_TYPES } from './bunkers.js';
 
-// Grid: 9 columns wide (max 8 bunkers across = always 1 gap), 20 rows tall
+// Grid: 9 columns wide, 20 rows tall
 const GRID_COLS = 9;
 const GRID_ROWS = 20;
 
@@ -12,6 +13,9 @@ const grid = new Grid(GRID_COLS, GRID_ROWS);
 const canvas = document.getElementById('game');
 const renderer = new Renderer(canvas, grid);
 const waveManager = new WaveManager(grid);
+const bunkerManager = new BunkerManager();
+
+renderer.bunkerManager = bunkerManager;
 
 // UI elements
 const buildBtn = document.getElementById('build-btn');
@@ -29,6 +33,14 @@ const BUNKER_COST = 50;
 let gameOver = false;
 let lastTime = performance.now();
 
+// Kill bounty - based on wave budget
+function getKillBounty(waveNum) {
+  const budget = 100 + waveNum * 20;
+  const enemyCount = waveManager.spawnQueue.length + waveManager.enemies.length;
+  return Math.max(1, Math.round(budget / Math.max(1, enemyCount)));
+}
+let currentBounty = 10; // default
+
 // HP damage per enemy type
 const LEAK_DAMAGE = {
   grunt: 1,
@@ -38,7 +50,10 @@ const LEAK_DAMAGE = {
   boss: 20,
 };
 
-// Update path display
+// Garrison panel state
+let garrisonPanel = null;
+let selectedBunkerPos = null;
+
 function updatePath() {
   renderer.currentPath = grid.getCurrentPath();
 }
@@ -56,13 +71,25 @@ waveManager.onEnemyEscaped = (enemy) => {
   }
 };
 
-waveManager.onWaveStart = (waveNum) => {
-  waveNumEl.textContent = `Wave ${waveNum}`;
+waveManager.onEnemyKilled = (enemy) => {
+  cash += currentBounty;
+  cashEl.textContent = cash;
+  // Refresh garrison panel if open
+  if (garrisonPanel && selectedBunkerPos) {
+    const bunker = bunkerManager.getBunker(selectedBunkerPos.col, selectedBunkerPos.row);
+    if (bunker) renderGarrisonPanel(bunker);
+  }
 };
 
-waveManager.onWaveCleared = (waveNum) => {
-  // Wave clear bonus could go here later
+waveManager.onWaveStart = (waveNum) => {
+  waveNumEl.textContent = `Wave ${waveNum}`;
+  // Calculate bounty for this wave
+  const budget = 100 + waveNum * 20;
+  const totalEnemies = waveManager.spawnQueue.length + waveManager.enemies.length;
+  currentBounty = Math.max(1, Math.round(budget / Math.max(1, totalEnemies)));
 };
+
+waveManager.onWaveCleared = (waveNum) => {};
 
 // Build mode toggle
 buildBtn.addEventListener('click', () => {
@@ -71,6 +98,7 @@ buildBtn.addEventListener('click', () => {
   renderer.buildMode = buildMode;
   buildBtn.classList.toggle('active', buildMode);
   buildBtn.textContent = buildMode ? '✅ Building...' : '🔨 Build Mode';
+  closeGarrisonPanel();
 });
 
 // Handle click/tap on grid
@@ -78,15 +106,18 @@ function handleGridClick(screenX, screenY) {
   if (gameOver) return;
 
   const pos = renderer.screenToGrid(screenX, screenY);
-  if (!pos) return;
+  if (!pos) {
+    closeGarrisonPanel();
+    return;
+  }
 
   if (buildMode) {
+    // Place bunker
     if (cash < BUNKER_COST) {
       flashMessage('Not enough cash!');
       return;
     }
 
-    // Check no enemies on this cell
     const enemyOnCell = waveManager.enemies.some(e =>
       e.alive && Math.round(e.x) === pos.col && Math.round(e.y) === pos.row
     );
@@ -99,17 +130,127 @@ function handleGridClick(screenX, screenY) {
     if (placed) {
       cash -= BUNKER_COST;
       cashEl.textContent = cash;
+      bunkerManager.addBunker(pos.col, pos.row);
       updatePath();
-      // Recalculate paths for existing enemies
       waveManager.recalculatePaths();
     } else if (grid.canPlace(pos.col, pos.row)) {
       flashMessage('Would block the path!');
     }
+  } else {
+    // Check if clicking a bunker
+    const bunker = bunkerManager.getBunker(pos.col, pos.row);
+    if (bunker) {
+      openGarrisonPanel(bunker);
+    } else {
+      closeGarrisonPanel();
+    }
   }
+}
+
+// Garrison panel
+function openGarrisonPanel(bunker) {
+  selectedBunkerPos = { col: bunker.col, row: bunker.row };
+  renderer.selectedBunker = bunker;
+
+  closeGarrisonPanel();
+
+  garrisonPanel = document.createElement('div');
+  garrisonPanel.id = 'garrison-panel';
+  garrisonPanel.style.cssText = `
+    position: fixed; bottom: 60px; left: 50%; transform: translateX(-50%);
+    background: rgba(10, 10, 30, 0.95); border: 1px solid #444;
+    border-radius: 12px; padding: 16px; z-index: 50;
+    min-width: 300px; max-width: 90vw; color: white; font-family: sans-serif;
+  `;
+
+  renderGarrisonPanel(bunker);
+  document.body.appendChild(garrisonPanel);
+}
+
+function renderGarrisonPanel(bunker) {
+  if (!garrisonPanel) return;
+
+  let html = `<div style="font-weight:bold; font-size:16px; margin-bottom:10px;">
+    🏰 Bunker (${bunker.units.length}/${bunker.maxUnits})
+    <span style="float:right; cursor:pointer; font-size:20px;" id="close-panel">✕</span>
+  </div>`;
+
+  // Current garrison
+  if (bunker.units.length > 0) {
+    html += `<div style="margin-bottom:10px;">`;
+    for (const unit of bunker.units) {
+      const def = UNIT_TYPES[unit.type];
+      html += `<span style="display:inline-block; background:${def.color}; color:#fff;
+        padding:3px 8px; border-radius:4px; margin:2px; font-size:13px;">
+        ${def.shortName} T${unit.tier}</span>`;
+    }
+    html += `</div>`;
+  } else {
+    html += `<div style="color:#888; margin-bottom:10px; font-size:13px;">Empty — add units to attack</div>`;
+  }
+
+  // Add unit buttons
+  if (bunker.units.length < bunker.maxUnits) {
+    html += `<div style="font-size:13px; color:#aaa; margin-bottom:6px;">Add Unit:</div>`;
+    html += `<div style="display:flex; flex-wrap:wrap; gap:6px;">`;
+    for (const [type, def] of Object.entries(UNIT_TYPES)) {
+      const canAfford = cash >= def.cost;
+      html += `<button class="unit-buy-btn" data-type="${type}" style="
+        padding: 8px 12px; border-radius: 6px; border: 1px solid ${canAfford ? def.color : '#444'};
+        background: ${canAfford ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.03)'};
+        color: ${canAfford ? '#fff' : '#666'}; cursor: ${canAfford ? 'pointer' : 'not-allowed'};
+        font-size: 12px; flex: 1; min-width: 65px; text-align: center;
+      ">
+        <div style="font-weight:bold;">${def.shortName}</div>
+        <div style="font-size:11px;">$${def.cost}</div>
+      </button>`;
+    }
+    html += `</div>`;
+  }
+
+  // Stats
+  if (bunker.units.length > 0) {
+    html += `<div style="margin-top:10px; font-size:11px; color:#888;">
+      Range: ${bunker.getMaxRange()} cells
+    </div>`;
+  }
+
+  garrisonPanel.innerHTML = html;
+
+  // Close button
+  document.getElementById('close-panel')?.addEventListener('click', closeGarrisonPanel);
+
+  // Buy buttons
+  garrisonPanel.querySelectorAll('.unit-buy-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const type = btn.dataset.type;
+      const def = UNIT_TYPES[type];
+      if (cash < def.cost) {
+        flashMessage('Not enough cash!');
+        return;
+      }
+      if (bunker.units.length >= bunker.maxUnits) return;
+
+      bunker.addUnit(type);
+      cash -= def.cost;
+      cashEl.textContent = cash;
+      renderGarrisonPanel(bunker);
+    });
+  });
+}
+
+function closeGarrisonPanel() {
+  if (garrisonPanel) {
+    garrisonPanel.remove();
+    garrisonPanel = null;
+  }
+  selectedBunkerPos = null;
+  renderer.selectedBunker = null;
 }
 
 // Game over screen
 function showGameOver() {
+  closeGarrisonPanel();
   let el = document.getElementById('game-over');
   if (!el) {
     el = document.createElement('div');
@@ -129,7 +270,7 @@ function showGameOver() {
   `;
 }
 
-// Flash message overlay
+// Flash message
 let flashTimeout = null;
 function flashMessage(msg) {
   let el = document.getElementById('flash-msg');
@@ -150,7 +291,6 @@ function flashMessage(msg) {
   flashTimeout = setTimeout(() => { el.style.opacity = '0'; }, 1200);
 }
 
-// Format time
 function formatTime(seconds) {
   const s = Math.ceil(seconds);
   const min = Math.floor(s / 60);
@@ -158,26 +298,19 @@ function formatTime(seconds) {
   return `${min}:${sec.toString().padStart(2, '0')}`;
 }
 
-// Mouse/touch input
+// Input handling
 let isDragging = false;
 let lastTouchY = 0;
 let touchStartY = 0;
 let touchStartTime = 0;
 
-canvas.addEventListener('mousedown', (e) => {
-  isDragging = false;
-});
+canvas.addEventListener('mousedown', () => { isDragging = false; });
 
 canvas.addEventListener('mousemove', (e) => {
   const rect = canvas.getBoundingClientRect();
-  const x = e.clientX - rect.left;
-  const y = e.clientY - rect.top;
-  const pos = renderer.screenToGrid(x, y);
-  if (pos) {
-    renderer.setHover(pos.col, pos.row);
-  } else {
-    renderer.clearHover();
-  }
+  const pos = renderer.screenToGrid(e.clientX - rect.left, e.clientY - rect.top);
+  if (pos) renderer.setHover(pos.col, pos.row);
+  else renderer.clearHover();
 });
 
 canvas.addEventListener('click', (e) => {
@@ -186,11 +319,8 @@ canvas.addEventListener('click', (e) => {
   handleGridClick(e.clientX - rect.left, e.clientY - rect.top);
 });
 
-canvas.addEventListener('mouseleave', () => {
-  renderer.clearHover();
-});
+canvas.addEventListener('mouseleave', () => renderer.clearHover());
 
-// Touch support
 canvas.addEventListener('touchstart', (e) => {
   e.preventDefault();
   const touch = e.touches[0];
@@ -203,13 +333,9 @@ canvas.addEventListener('touchstart', (e) => {
 canvas.addEventListener('touchmove', (e) => {
   e.preventDefault();
   const touch = e.touches[0];
-  const deltaY = lastTouchY - touch.clientY;
-  renderer.scroll(deltaY);
+  renderer.scroll(lastTouchY - touch.clientY);
   lastTouchY = touch.clientY;
-
-  if (Math.abs(touch.clientY - touchStartY) > 10) {
-    isDragging = true;
-  }
+  if (Math.abs(touch.clientY - touchStartY) > 10) isDragging = true;
 }, { passive: false });
 
 canvas.addEventListener('touchend', (e) => {
@@ -221,47 +347,38 @@ canvas.addEventListener('touchend', (e) => {
   }
 }, { passive: false });
 
-// Mouse wheel scroll
 canvas.addEventListener('wheel', (e) => {
   e.preventDefault();
   renderer.scroll(e.deltaY);
 }, { passive: false });
 
-// Window resize
-window.addEventListener('resize', () => {
-  renderer.resize();
-});
+window.addEventListener('resize', () => renderer.resize());
+
+// Kill bounty handled via waveManager.onEnemyKilled callback
 
 // Game loop
 function gameLoop(timestamp) {
   requestAnimationFrame(gameLoop);
 
-  const dt = (timestamp - lastTime) / 1000;
+  const dt = Math.min((timestamp - lastTime) / 1000, 0.1);
   lastTime = timestamp;
 
-  // Clamp dt to avoid huge jumps
-  const clampedDt = Math.min(dt, 0.1);
-
   if (!gameOver) {
-    // Update wave manager
-    waveManager.update(clampedDt);
+    waveManager.update(dt);
+    bunkerManager.update(dt, waveManager.enemies);
 
-    // Update HUD
     const timeLeft = waveManager.getTimeUntilNextWave();
     if (timeLeft > 0) {
       waveTimerEl.textContent = `Next wave: ${formatTime(timeLeft)}`;
     } else {
-      const remaining = waveManager.getEnemiesRemaining();
-      waveTimerEl.textContent = `Enemies: ${remaining}`;
+      waveTimerEl.textContent = `Enemies: ${waveManager.getEnemiesRemaining()}`;
     }
   }
 
-  // Pass enemies to renderer
   renderer.enemies = waveManager.enemies;
   renderer.draw();
 }
 
 requestAnimationFrame(gameLoop);
 
-console.log('Impossible Tower Defense loaded!');
-console.log(`Grid: ${GRID_COLS}x${GRID_ROWS} | Bunker cost: $${BUNKER_COST}`);
+console.log('Impossible Tower Defense - Phase 3 loaded!');

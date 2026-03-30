@@ -2,6 +2,7 @@
 
 import { CELL_EMPTY, CELL_BUNKER, CELL_SPAWN, CELL_EXIT } from './grid.js';
 import { ENEMY_TYPES } from './enemies.js';
+import { UNIT_TYPES } from './bunkers.js';
 
 const COLORS = {
   background: '#1a1a2e',
@@ -49,6 +50,12 @@ export class Renderer {
 
     // Enemies reference
     this.enemies = [];
+
+    // Bunker manager reference
+    this.bunkerManager = null;
+
+    // Selected bunker for info display
+    this.selectedBunker = null;
 
     this.resize();
   }
@@ -202,6 +209,63 @@ export class Renderer {
       ctx.stroke();
     }
 
+    // Draw unit indicators on bunkers
+    if (this.bunkerManager) {
+      for (const bunker of this.bunkerManager.getAllBunkers()) {
+        const bx = this.offsetX + bunker.col * cs;
+        const by = bunker.row * cs;
+
+        if (by + cs < this.scrollY - cs || by > this.scrollY + this.viewHeight + cs) continue;
+
+        const units = bunker.units;
+        if (units.length === 0) continue;
+
+        // Draw unit dots in a 2x2 grid inside the bunker
+        const positions = [
+          [0.3, 0.3], [0.7, 0.3],
+          [0.3, 0.7], [0.7, 0.7],
+        ];
+
+        for (let i = 0; i < units.length; i++) {
+          const [px, py] = positions[i];
+          const ux = bx + px * cs;
+          const uy = by + py * cs;
+          const unitDef = UNIT_TYPES[units[i].type];
+
+          ctx.beginPath();
+          ctx.arc(ux, uy, cs * 0.12, 0, Math.PI * 2);
+          ctx.fillStyle = unitDef.color;
+          ctx.fill();
+          ctx.strokeStyle = 'rgba(255,255,255,0.5)';
+          ctx.lineWidth = 1;
+          ctx.stroke();
+        }
+
+        // Colored border based on garrison
+        if (units.length > 0) {
+          const primaryColor = UNIT_TYPES[units[0].type].color;
+          ctx.strokeStyle = primaryColor;
+          ctx.lineWidth = 2;
+          ctx.strokeRect(bx + 1, by + 1, cs - 2, cs - 2);
+        }
+      }
+
+      // Draw range circle for selected bunker
+      if (this.selectedBunker && this.selectedBunker.units.length > 0) {
+        const range = this.selectedBunker.getMaxRange();
+        const sx = this.offsetX + this.selectedBunker.col * cs + cs / 2;
+        const sy = this.selectedBunker.row * cs + cs / 2;
+
+        ctx.beginPath();
+        ctx.arc(sx, sy, range * cs, 0, Math.PI * 2);
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
+        ctx.lineWidth = 1;
+        ctx.setLineDash([4, 4]);
+        ctx.stroke();
+        ctx.setLineDash([]);
+      }
+    }
+
     // Hover highlight
     if (this.hoverCol >= 0 && this.hoverRow >= 0 && this.buildMode) {
       const x = this.offsetX + this.hoverCol * cs;
@@ -248,6 +312,36 @@ export class Renderer {
       // Fill
       ctx.fillStyle = hpRatio > 0.3 ? COLORS.hpBarFill : COLORS.hpBarLow;
       ctx.fillRect(barX, barY, barWidth * hpRatio, barHeight);
+    }
+
+    // Draw projectiles
+    if (this.bunkerManager) {
+      for (const proj of this.bunkerManager.projectiles) {
+        const fx = this.offsetX + proj.fromX * cs + cs / 2;
+        const fy = proj.fromY * cs + cs / 2;
+        const tx = this.offsetX + proj.toX * cs + cs / 2;
+        const ty = proj.toY * cs + cs / 2;
+
+        ctx.beginPath();
+        ctx.moveTo(fx, fy);
+        ctx.lineTo(tx, ty);
+        ctx.strokeStyle = proj.color;
+        ctx.lineWidth = 2;
+        ctx.globalAlpha = Math.min(1, proj.life / 0.08);
+        ctx.stroke();
+        ctx.globalAlpha = 1;
+
+        // Splash circle
+        if (proj.splash && proj.splashRadius > 0) {
+          ctx.beginPath();
+          ctx.arc(tx, ty, proj.splashRadius * cs, 0, Math.PI * 2);
+          ctx.strokeStyle = proj.color;
+          ctx.globalAlpha = Math.min(0.4, proj.life / 0.1);
+          ctx.lineWidth = 1;
+          ctx.stroke();
+          ctx.globalAlpha = 1;
+        }
+      }
     }
 
     ctx.restore();

@@ -14,6 +14,7 @@ export class Enemy {
     this.escaped = false;
     this.path = [];
     this.pathIndex = 0;
+    this.dots = []; // {dps, remaining}
   }
 
   setPath(path) {
@@ -26,6 +27,9 @@ export class Enemy {
   }
 
   update(dt) {
+    // Process DOTs
+    if (this.dots.length > 0) this.updateDots(dt);
+
     if (!this.alive || !this.path || this.pathIndex >= this.path.length - 1) {
       if (this.alive && this.path && this.pathIndex >= this.path.length - 1) {
         this.escaped = true;
@@ -59,6 +63,21 @@ export class Enemy {
     if (this.hp <= 0) {
       this.hp = 0;
       this.alive = false;
+    }
+  }
+
+  applyDot(dps, duration) {
+    this.dots.push({ dps, remaining: duration });
+  }
+
+  updateDots(dt) {
+    for (let i = this.dots.length - 1; i >= 0; i--) {
+      const dot = this.dots[i];
+      this.takeDamage(dot.dps * dt);
+      dot.remaining -= dt;
+      if (dot.remaining <= 0) {
+        this.dots.splice(i, 1);
+      }
     }
   }
 }
@@ -113,6 +132,8 @@ export class WaveManager {
     // Update all enemies
     for (const enemy of this.enemies) {
       if (!enemy.alive) continue;
+
+      const wasAlive = enemy.alive;
       enemy.update(dt);
 
       if (enemy.escaped) {
@@ -120,8 +141,16 @@ export class WaveManager {
       }
     }
 
-    // Clean up dead enemies (after a short delay for visual)
-    this.enemies = this.enemies.filter(e => e.alive || e.escaped);
+    // Check for newly killed enemies (killed by bunker damage)
+    for (const enemy of this.enemies) {
+      if (!enemy.alive && !enemy.escaped && !enemy._deathHandled) {
+        enemy._deathHandled = true;
+        if (this.onEnemyKilled) this.onEnemyKilled(enemy);
+      }
+    }
+
+    // Clean up dead/escaped enemies
+    this.enemies = this.enemies.filter(e => e.alive);
 
     // Check if wave is cleared
     if (this.waveActive && this.spawnQueue.length === 0 && this.enemies.length === 0) {
