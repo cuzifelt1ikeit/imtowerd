@@ -16,9 +16,11 @@ const waveManager = new WaveManager(grid);
 const bunkerManager = new BunkerManager();
 
 renderer.bunkerManager = bunkerManager;
+renderer.effects = waveManager.effects;
 
 // UI elements
 const buildBtn = document.getElementById('build-btn');
+const sendBtn = document.getElementById('send-btn');
 const cashEl = document.getElementById('cash');
 const hpEl = document.getElementById('hp');
 const waveNumEl = document.getElementById('wave-num');
@@ -96,6 +98,18 @@ waveManager.onWaveStart = (waveNum) => {
 };
 
 waveManager.onWaveCleared = (waveNum) => {};
+
+// Early send button
+sendBtn.addEventListener('click', () => {
+  if (gameOver) return;
+  const bonus = waveManager.sendEarly();
+  if (bonus > 0) {
+    cash += bonus;
+    totalEarned += bonus;
+    cashEl.textContent = cash;
+    flashMessage(`+$${bonus} early send bonus!`, '#f0c040');
+  }
+});
 
 // Build mode toggle
 buildBtn.addEventListener('click', () => {
@@ -335,14 +349,14 @@ function showGameOver() {
 
 // Flash message
 let flashTimeout = null;
-function flashMessage(msg) {
+function flashMessage(msg, color = '#ff6b6b') {
   let el = document.getElementById('flash-msg');
   if (!el) {
     el = document.createElement('div');
     el.id = 'flash-msg';
     el.style.cssText = `
       position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
-      background: rgba(0,0,0,0.8); color: #ff6b6b; padding: 12px 24px;
+      background: rgba(0,0,0,0.8); color: ${color}; padding: 12px 24px;
       border-radius: 8px; font-size: 18px; font-weight: bold; z-index: 100;
       pointer-events: none; transition: opacity 0.3s;
     `;
@@ -433,8 +447,15 @@ function gameLoop(timestamp) {
     const timeLeft = waveManager.getTimeUntilNextWave();
     if (timeLeft > 0) {
       waveTimerEl.textContent = `Next wave: ${formatTime(timeLeft)}`;
+      sendBtn.style.display = 'inline-block';
+      const bonus = Math.round(timeLeft * 5);
+      sendBtn.textContent = `⚡ Send (+$${bonus})`;
     } else {
-      waveTimerEl.textContent = `Enemies: ${waveManager.getEnemiesRemaining()}`;
+      const remaining = waveManager.getEnemiesRemaining();
+      const pfCount = waveManager.enemies.filter(e => e.alive && e.isPathfinder).length;
+      const wandCount = waveManager.enemies.filter(e => e.alive && !e.isPathfinder).length;
+      waveTimerEl.textContent = `Enemies: ${remaining} (🧭${pfCount} ?${wandCount})`;
+      sendBtn.style.display = 'none';
     }
   }
 

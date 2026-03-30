@@ -51,6 +51,9 @@ export class Renderer {
     // Enemies reference
     this.enemies = [];
 
+    // Effects manager reference
+    this.effects = null;
+
     // Bunker manager reference
     this.bunkerManager = null;
 
@@ -283,20 +286,46 @@ export class Renderer {
       const ex = this.offsetX + enemy.x * cs + cs / 2;
       const ey = enemy.y * cs + cs / 2;
 
-      // Skip if off screen
       if (ey + cs < this.scrollY - cs || ey - cs > this.scrollY + this.viewHeight + cs) continue;
 
       const typeDef = ENEMY_TYPES[enemy.type] || ENEMY_TYPES.grunt;
       const radius = (cs * typeDef.size) / 2;
 
+      // Hit flash — white overlay
+      if (enemy.hitFlash > 0) {
+        ctx.beginPath();
+        ctx.arc(ex, ey, radius + 2, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(255,255,255,${enemy.hitFlash * 8})`;
+        ctx.fill();
+      }
+
       // Enemy body
       ctx.beginPath();
       ctx.arc(ex, ey, radius, 0, Math.PI * 2);
-      ctx.fillStyle = typeDef.color;
+      ctx.fillStyle = enemy.hitFlash > 0 ? '#ffffff' : typeDef.color;
       ctx.fill();
       ctx.strokeStyle = 'rgba(0,0,0,0.4)';
       ctx.lineWidth = 2;
       ctx.stroke();
+
+      // Burn indicator (DOT active)
+      if (enemy.dots.length > 0) {
+        ctx.beginPath();
+        ctx.arc(ex, ey, radius + 3, 0, Math.PI * 2);
+        ctx.strokeStyle = 'rgba(255, 100, 0, 0.6)';
+        ctx.lineWidth = 1.5;
+        ctx.setLineDash([2, 2]);
+        ctx.stroke();
+        ctx.setLineDash([]);
+      }
+
+      // Wanderer indicator — small "?" above
+      if (!enemy.isPathfinder) {
+        ctx.fillStyle = 'rgba(255,255,255,0.4)';
+        ctx.font = `${Math.max(8, cs * 0.15)}px sans-serif`;
+        ctx.textAlign = 'center';
+        ctx.fillText('?', ex, ey - radius - 10);
+      }
 
       // HP bar
       const barWidth = cs * 0.8;
@@ -305,13 +334,41 @@ export class Renderer {
       const barY = ey - radius - 8;
       const hpRatio = enemy.hp / enemy.maxHp;
 
-      // Background
       ctx.fillStyle = COLORS.hpBarBg;
       ctx.fillRect(barX, barY, barWidth, barHeight);
 
-      // Fill
       ctx.fillStyle = hpRatio > 0.3 ? COLORS.hpBarFill : COLORS.hpBarLow;
       ctx.fillRect(barX, barY, barWidth * hpRatio, barHeight);
+    }
+
+    // Draw death particles
+    if (this.effects) {
+      for (const p of this.effects.particles) {
+        const px = this.offsetX + p.x * cs + cs / 2;
+        const py = p.y * cs + cs / 2;
+        const alpha = p.life / p.maxLife;
+
+        ctx.beginPath();
+        ctx.arc(px, py, p.size * alpha, 0, Math.PI * 2);
+        ctx.fillStyle = p.color;
+        ctx.globalAlpha = alpha;
+        ctx.fill();
+        ctx.globalAlpha = 1;
+      }
+
+      // Damage numbers
+      for (const d of this.effects.damageNumbers) {
+        const dx = this.offsetX + d.x * cs + cs / 2;
+        const dy = d.y * cs + cs / 2;
+        const alpha = d.life / d.maxLife;
+
+        ctx.globalAlpha = alpha;
+        ctx.fillStyle = '#ff6b6b';
+        ctx.font = `bold ${Math.max(10, cs * 0.2)}px sans-serif`;
+        ctx.textAlign = 'center';
+        ctx.fillText(d.text, dx, dy);
+        ctx.globalAlpha = 1;
+      }
     }
 
     // Draw projectiles
