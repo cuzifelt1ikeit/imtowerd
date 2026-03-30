@@ -170,13 +170,14 @@ export class Enemy {
     }
 
     // If we still have a waypoint to reach, keep moving toward it
-    this.wanderTimer -= dt;
-    if (this.wanderTimer > 0 && this.path && this.pathIndex < this.path.length - 1) {
+    if (this.path && this.pathIndex < this.path.length - 1) {
       this.updatePathfinder(dt); // Reuse pathfinder movement for smooth animation
       return;
     }
 
-    // Time to pick a new direction!
+    // Reached the target cell — small pause before picking a new direction
+    this.wanderTimer -= dt;
+    if (this.wanderTimer > 0) return;
     this.wanderTimer = this.wanderInterval + Math.random() * 0.2;
 
     const curCol = Math.round(this.x);
