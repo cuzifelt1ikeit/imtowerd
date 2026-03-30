@@ -512,8 +512,8 @@ export class WaveManager {
   generateWave(waveNum) {
     const queue = [];
     const pfRatio = this.getPathfinderRatio(waveNum);
-    const hpMultiplier = Math.pow(1.15, waveNum); // Exponential HP scaling (steeper curve)
-    const speedMultiplier = waveNum > 8 ? 1 + (waveNum - 8) * 0.015 : 1; // Speed ramps earlier
+    const hpMultiplier = Math.pow(1.20, waveNum); // Aggressive HP scaling
+    const speedMultiplier = waveNum > 5 ? 1 + (waveNum - 5) * 0.02 : 1; // Speed ramps from wave 6
 
     if (waveNum <= 5) {
       // ── Introduction Waves ──
@@ -537,7 +537,7 @@ export class WaveManager {
     } else {
       // ── Mixed Waves ──
       const types = ['grunt', 'runner', 'tank', 'swarm'];
-      const count = 12 + waveNum * 3; // More enemies each wave (ramps harder)
+      const count = 15 + waveNum * 4; // Swarms get overwhelming fast
 
       // Boss every 10 waves (always a pathfinder, extra HP)
       if (waveNum % 10 === 0) {

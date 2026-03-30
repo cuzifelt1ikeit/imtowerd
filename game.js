@@ -65,7 +65,7 @@ let totalLeaked = 0;
 // This means every wave rewards roughly the same total cash, regardless
 // of whether it has 5 tanks or 25 swarmers.
 function getKillBounty(waveNum) {
-  const budget = 60 + waveNum * 12; // Tighter economy — forces strategic spending
+  const budget = 50 + waveNum * 10; // Very tight economy
   const enemyCount = waveManager.spawnQueue.length + waveManager.enemies.length;
   return Math.max(1, Math.round(budget / Math.max(1, enemyCount)));
 }
@@ -86,6 +86,14 @@ const LEAK_DAMAGE = {
 // It lets you add units and upgrade existing ones.
 let garrisonPanel = null;
 let selectedBunkerPos = null;
+
+/** Refresh the garrison panel if it's open (call whenever cash changes) */
+function refreshGarrison() {
+  if (garrisonPanel && selectedBunkerPos) {
+    const bunker = bunkerManager.getBunker(selectedBunkerPos.col, selectedBunkerPos.row);
+    if (bunker) renderGarrisonPanel(bunker);
+  }
+}
 
 function updatePath() {
   renderer.currentPath = grid.getCurrentPath();
@@ -112,17 +120,13 @@ waveManager.onEnemyKilled = (enemy) => {
   totalEarned += currentBounty;
   totalKills++;
   cashEl.textContent = cash;
-  // Refresh garrison panel if open
-  if (garrisonPanel && selectedBunkerPos) {
-    const bunker = bunkerManager.getBunker(selectedBunkerPos.col, selectedBunkerPos.row);
-    if (bunker) renderGarrisonPanel(bunker);
-  }
+  refreshGarrison();
 };
 
 waveManager.onWaveStart = (waveNum) => {
   waveNumEl.textContent = `Wave ${waveNum}`;
   // Calculate bounty for this wave
-  const budget = 60 + waveNum * 12;
+  const budget = 50 + waveNum * 10;
   const totalEnemies = waveManager.spawnQueue.length + waveManager.enemies.length;
   currentBounty = Math.max(1, Math.round(budget / Math.max(1, totalEnemies)));
 };
@@ -142,6 +146,7 @@ sendBtn.addEventListener('click', () => {
     cash += bonus;
     totalEarned += bonus;
     cashEl.textContent = cash;
+    refreshGarrison();
     flashMessage(`+$${bonus} early send bonus!`, '#f0c040');
   }
 });
