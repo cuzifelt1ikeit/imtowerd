@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Impossible Tower Defense</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div id="hud">
+    <div id="hud-left">💰 <span id="cash">500</span></div>
+    <div id="hud-center">
+      <div id="wave-num">Wave 1</div>
+      <div id="wave-timer">Next wave: 0:30</div>
+    </div>
+    <div id="hud-right">❤️ <span id="hp">100</span>/100</div>
+  </div>
+  <canvas id="game"></canvas>
+  <div id="bottom-bar">
+    <button id="build-btn">🔨 Build Mode</button>
+  </div>
+  <script type="module" src="game.js"></script>
+</body>
+</html>
