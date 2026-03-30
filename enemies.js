@@ -372,9 +372,10 @@ export class WaveManager {
     this.spawnQueue = [];           // Enemies waiting to be spawned
     this.spawnTimer = 0;            // Countdown to next spawn
     this.spawnInterval = 0.4;       // Seconds between enemy spawns
-    this.betweenWaveTimer = 10;     // Countdown to first wave
+    this.betweenWaveTimer = 0;      // Countdown between waves (0 = waiting for player)
     this.betweenWaveDuration = 15;  // Seconds between waves
     this.waveCleared = true;        // Has the current wave been fully cleared?
+    this.waitingForPlayer = true;   // True before wave 1 — player must click Start
 
     // Callbacks — the game.js file sets these to react to events
     this.onEnemyEscaped = null;     // Called when an enemy reaches the exit
@@ -407,6 +408,7 @@ export class WaveManager {
   update(dt) {
     // ── Between Waves: Count Down ──
     if (!this.waveActive && this.waveCleared) {
+      if (this.waitingForPlayer) return; // Don't auto-start — player must click Start
       this.betweenWaveTimer -= dt;
       if (this.betweenWaveTimer <= 0) {
         this.startNextWave();
@@ -466,6 +468,14 @@ export class WaveManager {
    */
   sendEarly() {
     if (this.waveActive || !this.waveCleared) return 0;
+
+    // First click starts the game (no bonus for that)
+    if (this.waitingForPlayer) {
+      this.waitingForPlayer = false;
+      this.betweenWaveTimer = 0;
+      return 0;
+    }
+
     const timeLeft = this.betweenWaveTimer;
     if (timeLeft <= 1) return 0; // Too close to auto-start, no bonus
 
@@ -502,8 +512,8 @@ export class WaveManager {
   generateWave(waveNum) {
     const queue = [];
     const pfRatio = this.getPathfinderRatio(waveNum);
-    const hpMultiplier = Math.pow(1.08, waveNum); // Exponential HP scaling
-    const speedMultiplier = waveNum > 15 ? 1 + (waveNum - 15) * 0.01 : 1;
+    const hpMultiplier = Math.pow(1.15, waveNum); // Exponential HP scaling (steeper curve)
+    const speedMultiplier = waveNum > 8 ? 1 + (waveNum - 8) * 0.015 : 1; // Speed ramps earlier
 
     if (waveNum <= 5) {
       // ── Introduction Waves ──
@@ -527,7 +537,7 @@ export class WaveManager {
     } else {
       // ── Mixed Waves ──
       const types = ['grunt', 'runner', 'tank', 'swarm'];
-      const count = 10 + waveNum * 2; // More enemies each wave
+      const count = 12 + waveNum * 3; // More enemies each wave (ramps harder)
 
       // Boss every 10 waves (always a pathfinder, extra HP)
       if (waveNum % 10 === 0) {

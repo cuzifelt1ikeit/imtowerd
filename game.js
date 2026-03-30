@@ -31,6 +31,9 @@ const bunkerManager = new BunkerManager();              // Manages all bunkers
 // Connect systems so the renderer can draw bunkers and effects
 renderer.bunkerManager = bunkerManager;
 renderer.effects = waveManager.effects;
+renderer.buildMode = true;
+buildBtn.classList.add('active');
+buildBtn.textContent = '✅ Building...';
 
 // ── UI Element References ────────────────────────────────────────
 // These grab HTML elements so we can update their text/visibility from code.
@@ -44,7 +47,7 @@ const waveTimerEl = document.getElementById('wave-timer');
 // ── Game State ───────────────────────────────────────────────────
 // These variables track the current state of the game.
 // They change as the player builds, enemies die, etc.
-let buildMode = false;
+let buildMode = true; // Start in build mode so player can place immediately
 let cash = 500;
 let playerHp = 100;
 const MAX_HP = 100;
@@ -60,7 +63,7 @@ let totalLeaked = 0;
 // This means every wave rewards roughly the same total cash, regardless
 // of whether it has 5 tanks or 25 swarmers.
 function getKillBounty(waveNum) {
-  const budget = 100 + waveNum * 20;
+  const budget = 60 + waveNum * 12; // Tighter economy — forces strategic spending
   const enemyCount = waveManager.spawnQueue.length + waveManager.enemies.length;
   return Math.max(1, Math.round(budget / Math.max(1, enemyCount)));
 }
@@ -117,16 +120,21 @@ waveManager.onEnemyKilled = (enemy) => {
 waveManager.onWaveStart = (waveNum) => {
   waveNumEl.textContent = `Wave ${waveNum}`;
   // Calculate bounty for this wave
-  const budget = 100 + waveNum * 20;
+  const budget = 60 + waveNum * 12;
   const totalEnemies = waveManager.spawnQueue.length + waveManager.enemies.length;
   currentBounty = Math.max(1, Math.round(budget / Math.max(1, totalEnemies)));
 };
 
 waveManager.onWaveCleared = (waveNum) => {};
 
-// Early send button
+// Early send / Start button
 sendBtn.addEventListener('click', () => {
   if (gameOver) return;
+  if (waveManager.waitingForPlayer) {
+    waveManager.sendEarly(); // Starts the game
+    flashMessage('Wave 1 incoming!', '#4CAF50');
+    return;
+  }
   const bonus = waveManager.sendEarly();
   if (bonus > 0) {
     cash += bonus;
@@ -476,8 +484,12 @@ function gameLoop(timestamp) {
     waveManager.update(dt);
     bunkerManager.update(dt, waveManager.enemies);
 
-    const timeLeft = waveManager.getTimeUntilNextWave();
-    if (timeLeft > 0) {
+    if (waveManager.waitingForPlayer) {
+      waveTimerEl.textContent = `Build your maze, then start!`;
+      sendBtn.style.display = 'inline-block';
+      sendBtn.textContent = `▶ Start Game`;
+    } else if (waveManager.getTimeUntilNextWave() > 0) {
+      const timeLeft = waveManager.getTimeUntilNextWave();
       waveTimerEl.textContent = `Next wave: ${formatTime(timeLeft)}`;
       sendBtn.style.display = 'inline-block';
       const bonus = Math.round(timeLeft * 5);
