@@ -1,4 +1,23 @@
-// 2D Canvas renderer for the TD grid
+/**
+ * RENDERER.JS — 2D Canvas Rendering
+ *
+ * This file draws everything you see on screen:
+ * - The grid (cells, spawn zone, exit zone)
+ * - Bunkers and their garrisoned unit indicators
+ * - The A* path visualization (green line)
+ * - Enemies (colored circles with HP bars)
+ * - Projectile lines when bunkers fire
+ * - Death particles and damage numbers
+ * - Build mode hover highlights
+ * - Scroll position and scroll indicator
+ *
+ * Uses the HTML5 Canvas API — a 2D drawing surface where you
+ * draw shapes, lines, and text using JavaScript commands.
+ *
+ * The draw() method is called every frame (~60 times/second)
+ * and redraws the entire screen from scratch each time.
+ * This is standard for game rendering — it's called "immediate mode."
+ */
 
 import { CELL_EMPTY, CELL_BUNKER, CELL_SPAWN, CELL_EXIT } from './grid.js';
 import { ENEMY_TYPES } from './enemies.js';

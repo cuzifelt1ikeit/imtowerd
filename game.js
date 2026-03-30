@@ -1,24 +1,39 @@
-// Impossible Tower Defense - Phase 3: Bunkers Shoot
+/**
+ * GAME.JS — Main Game Loop & UI Logic
+ *
+ * This is the "brain" of the game. It connects all the other modules together:
+ * - Creates the grid, renderer, wave manager, and bunker manager
+ * - Handles all user input (clicks, touches, button presses)
+ * - Manages the game state (cash, HP, wave number)
+ * - Controls the garrison panel UI (buying and upgrading units)
+ * - Runs the main game loop (update → draw, 60 times per second)
+ *
+ * Think of this file as the conductor of an orchestra — it doesn't play
+ * any instruments itself, but it tells everyone else when and how to play.
+ */
 
 import { Grid } from './grid.js';
 import { Renderer } from './renderer.js';
 import { WaveManager } from './enemies.js';
 import { BunkerManager, UNIT_TYPES, MAX_TIER, getUpgradeCost } from './bunkers.js';
 
-// Grid: 9 columns wide, 20 rows tall
+// ── Initialize Core Systems ──────────────────────────────────────
+// Grid: 9 columns wide (max 8 bunkers across = always 1 gap), 20 rows tall
 const GRID_COLS = 9;
 const GRID_ROWS = 20;
 
-const grid = new Grid(GRID_COLS, GRID_ROWS);
-const canvas = document.getElementById('game');
-const renderer = new Renderer(canvas, grid);
-const waveManager = new WaveManager(grid);
-const bunkerManager = new BunkerManager();
+const grid = new Grid(GRID_COLS, GRID_ROWS);          // The game board
+const canvas = document.getElementById('game');         // The HTML canvas element
+const renderer = new Renderer(canvas, grid);            // Draws everything to screen
+const waveManager = new WaveManager(grid);              // Controls enemy waves
+const bunkerManager = new BunkerManager();              // Manages all bunkers
 
+// Connect systems so the renderer can draw bunkers and effects
 renderer.bunkerManager = bunkerManager;
 renderer.effects = waveManager.effects;
 
-// UI elements
+// ── UI Element References ────────────────────────────────────────
+// These grab HTML elements so we can update their text/visibility from code.
 const buildBtn = document.getElementById('build-btn');
 const sendBtn = document.getElementById('send-btn');
 const cashEl = document.getElementById('cash');
@@ -26,7 +41,9 @@ const hpEl = document.getElementById('hp');
 const waveNumEl = document.getElementById('wave-num');
 const waveTimerEl = document.getElementById('wave-timer');
 
-// Game state
+// ── Game State ───────────────────────────────────────────────────
+// These variables track the current state of the game.
+// They change as the player builds, enemies die, etc.
 let buildMode = false;
 let cash = 500;
 let playerHp = 100;
@@ -38,7 +55,10 @@ let totalKills = 0;
 let totalEarned = 0;
 let totalLeaked = 0;
 
-// Kill bounty - based on wave budget
+// ── Economy ──────────────────────────────────────────────────────
+// Kill bounty is calculated per-wave: total budget / number of enemies.
+// This means every wave rewards roughly the same total cash, regardless
+// of whether it has 5 tanks or 25 swarmers.
 function getKillBounty(waveNum) {
   const budget = 100 + waveNum * 20;
   const enemyCount = waveManager.spawnQueue.length + waveManager.enemies.length;
@@ -46,7 +66,8 @@ function getKillBounty(waveNum) {
 }
 let currentBounty = 10; // default
 
-// HP damage per enemy type
+// How much HP the player loses when each enemy type reaches the exit.
+// Bigger/scarier enemies hurt more — a leaked boss is devastating.
 const LEAK_DAMAGE = {
   grunt: 1,
   runner: 2,
@@ -55,7 +76,9 @@ const LEAK_DAMAGE = {
   boss: 20,
 };
 
-// Garrison panel state
+// ── Garrison Panel ───────────────────────────────────────────────
+// The garrison panel is the popup that appears when you tap a bunker.
+// It lets you add units and upgrade existing ones.
 let garrisonPanel = null;
 let selectedBunkerPos = null;
 
@@ -64,7 +87,9 @@ function updatePath() {
 }
 updatePath();
 
-// Wave manager callbacks
+// ── Event Callbacks ──────────────────────────────────────────────
+// These functions are called by the wave manager when things happen.
+// They connect game events to UI updates and state changes.
 waveManager.onEnemyEscaped = (enemy) => {
   const damage = LEAK_DAMAGE[enemy.type] || 1;
   playerHp = Math.max(0, playerHp - damage);
@@ -375,7 +400,10 @@ function formatTime(seconds) {
   return `${min}:${sec.toString().padStart(2, '0')}`;
 }
 
-// Input handling
+// ── Input Handling ───────────────────────────────────────────────
+// Handles both mouse (desktop) and touch (mobile) input.
+// Touch input distinguishes between scrolling (drag) and tapping (click)
+// by checking how far the finger moved and how long it was held.
 let isDragging = false;
 let lastTouchY = 0;
 let touchStartY = 0;
@@ -431,9 +459,13 @@ canvas.addEventListener('wheel', (e) => {
 
 window.addEventListener('resize', () => renderer.resize());
 
-// Kill bounty handled via waveManager.onEnemyKilled callback
-
-// Game loop
+// ── Main Game Loop ───────────────────────────────────────────────
+// This function runs ~60 times per second (via requestAnimationFrame).
+// Each frame: update game state → draw everything to the screen.
+//
+// "dt" (delta time) is the time since the last frame in seconds.
+// Using dt makes the game run at the same speed regardless of frame rate.
+// Example: if an enemy moves at 2 cells/second, it moves 2*dt cells per frame.
 function gameLoop(timestamp) {
   requestAnimationFrame(gameLoop);
 
@@ -465,4 +497,4 @@ function gameLoop(timestamp) {
 
 requestAnimationFrame(gameLoop);
 
-console.log('Impossible Tower Defense - Phase 3 loaded!');
+console.log('Impossible Tower Defense loaded!');
