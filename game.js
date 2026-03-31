@@ -395,8 +395,14 @@ function showGameOver() {
       <div>🏰 Bunkers: <span style="color:#aaa; float:right;">${bunkerCount}</span></div>
       <div>👥 Units: <span style="color:#aaa; float:right;">${unitCount}</span></div>
     </div>
-    <p style="font-size: 16px; color: #666; margin-top:20px;">Refresh to play again</p>
+    <button id="play-again-btn" style="
+      margin-top: 20px; padding: 14px 36px; font-size: 18px; font-weight: bold;
+      border: 2px solid #4CAF50; border-radius: 8px;
+      background: rgba(76, 175, 80, 0.2); color: #4CAF50;
+      cursor: pointer;
+    ">🔄 Play Again</button>
   `;
+  document.getElementById('play-again-btn').addEventListener('click', () => location.reload());
 }
 
 // Flash message
