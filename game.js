@@ -242,9 +242,9 @@ function openGarrisonPanel(bunker) {
 function renderGarrisonPanel(bunker) {
   if (!garrisonPanel) return;
 
-  let html = `<div style="font-weight:bold; font-size:16px; margin-bottom:10px;">
-    🏰 Bunker (${bunker.units.length}/${bunker.maxUnits})
-    <span style="float:right; cursor:pointer; font-size:20px;" id="close-panel">✕</span>
+  let html = `<div id="close-panel" style="display:flex; justify-content:space-between; align-items:center; font-weight:bold; font-size:16px; margin-bottom:10px; cursor:pointer; padding:4px 0;">
+    <span>🏰 Bunker (${bunker.units.length}/${bunker.maxUnits})</span>
+    <span style="font-size:20px; padding:4px 8px;">✕</span>
   </div>`;
 
   // Current garrison with upgrade buttons
