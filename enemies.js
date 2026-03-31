@@ -591,12 +591,38 @@ export class WaveManager {
         }
       }
     } else {
-      // Wanderers don't need a full path — they'll decide each step
+      // Wanderers pick a valid first step — check row 1 isn't blocked
       enemy.x = spawnCol;
       enemy.y = 0;
-      enemy.path = [{ col: spawnCol, row: 0 }, { col: spawnCol, row: 1 }];
-      enemy.pathIndex = 0;
-      this.enemies.push(enemy);
+
+      // Find a walkable cell adjacent to the spawn point
+      let firstStep = null;
+      // Prefer down, then sides
+      const candidates = [
+        { col: spawnCol, row: 1 },
+        { col: spawnCol - 1, row: 0 },
+        { col: spawnCol + 1, row: 0 },
+      ];
+      for (const c of candidates) {
+        const cell = this.grid.getCell(c.col, c.row);
+        if (cell !== -1 && cell !== 1) { // not out of bounds, not a bunker
+          firstStep = c;
+          break;
+        }
+      }
+
+      if (firstStep) {
+        enemy.path = [{ col: spawnCol, row: 0 }, firstStep];
+        enemy.pathIndex = 0;
+        this.enemies.push(enemy);
+      } else {
+        // Completely boxed in — use pathfinder fallback
+        const path = this.grid.findPath(spawnCol, 0, null);
+        if (path) {
+          enemy.setPath(path);
+          this.enemies.push(enemy);
+        }
+      }
     }
   }
 
