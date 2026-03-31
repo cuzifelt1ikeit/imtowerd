@@ -184,6 +184,17 @@ function handleGridClick(screenX, screenY) {
   }
 
   if (buildMode) {
+    // If clicking an existing bunker in build mode, exit build mode and open its panel
+    const existingBunker = bunkerManager.getBunker(pos.col, pos.row);
+    if (existingBunker) {
+      buildMode = false;
+      renderer.buildMode = false;
+      buildBtn.classList.remove('active');
+      buildBtn.textContent = '🔨 Build Mode';
+      openGarrisonPanel(existingBunker);
+      return;
+    }
+
     // Place bunker
     if (cash < BUNKER_COST) {
       flashMessage('Not enough cash!');
