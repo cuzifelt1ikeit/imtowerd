@@ -97,13 +97,10 @@ let garrisonPanel = null;
 let selectedBunkerPos = null;
 
 /** Refresh the garrison panel if it's open (call whenever cash changes) */
-let lastGarrisonCash = -1;
-let garrisonRefreshTimer = 0;
 function refreshGarrison() {
   if (garrisonPanel && selectedBunkerPos) {
     const bunker = bunkerManager.getBunker(selectedBunkerPos.col, selectedBunkerPos.row);
     if (bunker) renderGarrisonPanel(bunker);
-    lastGarrisonCash = cash;
   }
 }
 
@@ -132,6 +129,7 @@ waveManager.onEnemyKilled = (enemy) => {
   totalEarned += currentBounty;
   totalKills++;
   cashEl.textContent = cash;
+  refreshGarrison();
 };
 
 waveManager.onWaveStart = (waveNum) => {
@@ -510,15 +508,6 @@ function gameLoop(timestamp) {
   if (!gameOver) {
     waveManager.update(dt);
     bunkerManager.update(dt, waveManager.enemies);
-
-    // Refresh garrison panel when cash changes (throttled to every 0.3s)
-    if (garrisonPanel && cash !== lastGarrisonCash) {
-      garrisonRefreshTimer -= dt;
-      if (garrisonRefreshTimer <= 0) {
-        refreshGarrison();
-        garrisonRefreshTimer = 0.3;
-      }
-    }
 
     if (waveManager.waitingForPlayer) {
       waveTimerEl.textContent = `Build your maze, then start!`;
