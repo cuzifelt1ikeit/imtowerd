@@ -539,9 +539,7 @@ function gameLoop(timestamp) {
       sendBtn.textContent = `⚡ Send (+$${bonus})`;
     } else {
       const remaining = waveManager.getEnemiesRemaining();
-      const pfCount = waveManager.enemies.filter(e => e.alive && e.isPathfinder).length;
-      const wandCount = waveManager.enemies.filter(e => e.alive && !e.isPathfinder).length;
-      waveTimerEl.textContent = `Enemies: ${remaining} (🧭${pfCount} ❓${wandCount})`;
+      waveTimerEl.textContent = `Enemies: ${remaining}`;
       sendBtn.style.display = 'none';
     }
   }

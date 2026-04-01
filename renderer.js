@@ -362,12 +362,7 @@ export class Renderer {
         ctx.setLineDash([]);
       }
 
-      // Wanderer indicator — ❓ above
-      if (!enemy.isPathfinder) {
-        ctx.font = `${Math.max(10, cs * 0.22)}px sans-serif`;
-        ctx.textAlign = 'center';
-        ctx.fillText('❓', ex, ey - radius - 8);
-      }
+      // Wanderer indicator removed — clean look
 
       // HP bar
       const barWidth = cs * 0.8;
