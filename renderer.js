@@ -19,9 +19,9 @@
  * This is standard for game rendering — it's called "immediate mode."
  */
 
-import { CELL_EMPTY, CELL_BUNKER, CELL_SPAWN, CELL_EXIT } from './grid.js?v=20';
-import { ENEMY_TYPES } from './enemies.js?v=20';
-import { UNIT_TYPES } from './bunkers.js?v=20';
+import { CELL_EMPTY, CELL_BUNKER, CELL_SPAWN, CELL_EXIT } from './grid.js';
+import { ENEMY_TYPES } from './enemies.js';
+import { UNIT_TYPES } from './bunkers.js';
 
 const COLORS = {
   background: '#000000',

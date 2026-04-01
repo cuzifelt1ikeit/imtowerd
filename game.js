@@ -12,10 +12,10 @@
  * any instruments itself, but it tells everyone else when and how to play.
  */
 
-import { Grid } from './grid.js?v=20';
-import { Renderer } from './renderer.js?v=20';
-import { WaveManager } from './enemies.js?v=20';
-import { BunkerManager, UNIT_TYPES, MAX_TIER, getUpgradeCost } from './bunkers.js?v=20';
+import { Grid } from './grid.js';
+import { Renderer } from './renderer.js';
+import { WaveManager } from './enemies.js';
+import { BunkerManager, UNIT_TYPES, MAX_TIER, getUpgradeCost } from './bunkers.js';
 
 // ── Initialize Core Systems ──────────────────────────────────────
 // Grid: 9 columns wide (max 8 bunkers across = always 1 gap), 20 rows tall
