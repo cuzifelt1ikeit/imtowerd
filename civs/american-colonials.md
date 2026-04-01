@@ -1,0 +1,9 @@
+# 🇺🇸 American Revolution — Colonials
+
+| Role | Unit | Description |
+|------|------|-------------|
+| Grunt | Continental Soldier | Young soldier in a dark blue Continental Army uniform coat with white facings and brass buttons, buff-colored waistcoat underneath, white crossbelt over the chest, black tricorn hat with a cockade pinned to the side, brown leather cartridge box on the hip, carrying a long Brown Bess musket with bayonet fixed, white knee breeches and black buckled shoes, determined expression |
+| Runner | Minuteman | Lean farmer-turned-fighter in plain homespun linen shirt and brown wool breeches, no uniform at all, wide-brimmed straw hat, leather apron still on from the workshop, carrying a Pennsylvania long rifle at a sprint, powder horn bouncing on a strap across the chest, moccasin boots laced up tight, ready in sixty seconds |
+| Tank | Cavalry Officer | Mounted Continental dragoon officer on a brown horse, dark blue coat with gold epaulettes on both shoulders, white cravat at the throat, polished steel breastplate over the coat, cavalry saber drawn and raised high, black leather riding boots up to the knee, tricorn hat with gold trim, horse in full gallop with mane streaming |
+| Swarm | Militia Boys | Scrawny teenage militia recruit in oversized hand-me-down coat, too-big tricorn hat slipping over the eyes, carrying a pitchfork or rusty hunting musket taller than he is, bare feet or mismatched shoes, patched trousers, scared but defiant |
+| Boss | **George Washington** | Tall dignified commander on a white horse in full military dress, dark blue coat with gold embroidery and buff lapels, white powdered hair tied back in a queue, black tricorn hat with gold cockade, leather gloves gripping the reins in one hand and a drawn sword in the other, red officer's sash across the chest, boots polished to a mirror shine, sitting ramrod straight in the saddle with absolute authority. 32×32 sprite |

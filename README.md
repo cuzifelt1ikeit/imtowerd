@@ -4,14 +4,11 @@ A browser-based tower defense game where you build mazes, garrison bunkers, and 
 
 Inspired by StarCraft custom tower defense maps.
 
-## How to Play
+## Play Now
 
-### Setup
-```bash
-cd games/imtowerd
-npx http-server -p 8080 -c-1
-```
-Open `http://localhost:8080` in your browser.
+🎮 **[Play in your browser](https://cuzifelt1ikeit.github.io/imtowerd/)**
+
+## How to Play
 
 ### Controls
 - **Build Mode** — Tap the button at the bottom to toggle building
@@ -84,14 +81,6 @@ imtowerd/
 - **HTML5 Canvas** for all rendering
 - **No dependencies** — runs in any modern browser
 - Touch-friendly for mobile
-
-## Future Plans
-- Port to Godot for iOS release
-- Custom art assets (replacing placeholder shapes)
-- Sound effects
-- Multiple maps
-- Auto-turret tower type
-- Leaderboard (wave reached)
 
 ## License
 Personal project — not yet licensed for distribution.

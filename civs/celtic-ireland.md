@@ -1,0 +1,9 @@
+# ☘️ Celtic Ireland — Gaelic Warriors
+
+| Role | Unit | Description |
+|------|------|-------------|
+| Grunt | Gaelic Kern | Light Irish foot soldier in a saffron-dyed léine tunic falling to the knees, bare legs and simple rawhide shoes, no armor at all, carrying a bundle of short javelins in one hand and a small wooden buckler in the other, wild curly hair, short beard, lean and wiry from living off the land, quick darting eyes |
+| Runner | Fianna Scout | Young Fianna warrior in a grey wolf pelt draped over one shoulder and pinned with a bronze clasp, bare-chested underneath showing blue woad tattoos spiraling across the arms, light leather trousers, carrying only a short sword and sling, hair limed into stiff white spikes standing straight up, fleet-footed and silent, trained to run through forest without breaking a twig |
+| Tank | Gallowglass | Enormous Scottish-Irish mercenary heavy infantry in a long chainmail shirt reaching past the knees, open-faced iron helmet with a mail curtain protecting the neck, both hands gripping a massive two-handed sparth axe with a broad crescent blade, heavy leather boots, thick arms like tree trunks, a wall of iron and fury that does not retreat |
+| Swarm | War Crows / Ravens | Sleek black raven with glossy iridescent feathers, sharp curved beak open in a harsh caw, wings half-spread mid-hop across a battlefield, beady intelligent eyes, an omen of the Morrígan goddess of war and death watching from above |
+| Boss | **Brian Boru** | The High King of Ireland as an old man still terrifying in battle, silver-white hair and long beard flowing from beneath a gold circlet crown, heavy chainmail over a royal green cloak fastened with a massive Celtic knotwork brooch, ornate Irish sword with gold filigree hilt in one hand and a Celtic cross shield in the other, weathered face lined with decades of warfare, the king who united all of Ireland and broke the Vikings at Clontarf. 32×32 sprite |
