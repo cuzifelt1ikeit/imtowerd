@@ -1,9 +1,0 @@
-# 🏛️ Ancient Egypt
-
-| Role | Unit | Description |
-|------|------|-------------|
-| Grunt | Khopesh Soldier | Egyptian infantry soldier in white linen kilt and leather scale armor vest, blue and gold striped nemes headdress framing the face, dark kohl-lined eyes, bronze khopesh sickle-sword in the right hand with its distinctive curved blade, small wooden buckler reinforced with rawhide in the left, leather sandals laced up the ankles, bronze arm bracers |
-| Runner | Chariot Archer | Egyptian archer standing on a lightweight two-wheeled war chariot pulled by a single horse at full gallop, wearing only a white linen kilt and a quiver on the back, compound bow drawn to the cheek mid-shot, shaved head with a side-lock of youth, gold collar necklace bouncing on the chest, chariot wheels kicking up dust |
-| Tank | Anubis Guard | Elite temple guard wearing a towering jackal-headed Anubis mask in black and gold over the face, heavy bronze scale armor covering the torso and shoulders, white ceremonial kilt with gold trim, carrying a long bronze-tipped spear in both hands, gold cuffs on both wrists, moving in eerie silence like a god walking among mortals |
-| Swarm | Scarabs | Small black scarab beetle with an iridescent blue-green shell catching the light, six spindly legs clicking rapidly across stone, mandibles working, rolling across the ground in a skittering mass, ancient and relentless |
-| Boss | **Ramesses II** | The Great Pharaoh in a towering blue khepresh war crown studded with gold discs, false ceremonial beard strapped to the chin, elaborate gold and lapis lazuli broad collar necklace covering the shoulders, white pleated kilt with a gold belt and ceremonial bull tail hanging behind, dual bronze khopesh swords crossed at the chest, gold arm bracers engraved with hieroglyphs, cobra uraeus rearing from the crown's brow, the most powerful pharaoh who ever lived striding forward like a living god. 32×32 sprite |

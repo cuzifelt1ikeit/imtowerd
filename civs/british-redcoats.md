@@ -1,9 +1,0 @@
-# 🇬🇧 British Redcoats
-
-| Role | Unit | Description |
-|------|------|-------------|
-| Grunt | Redcoat Infantry | British line infantry soldier in a bright scarlet wool coat with white facings and polished brass buttons, white crossbelts forming an X across the chest, black felt tricorn hat, brown leather cartridge pouch on the right hip, carrying a Land Pattern musket with socket bayonet fixed, white gaiters buttoned over black shoes, stiff upright posture marching in lockstep |
-| Runner | Light Infantry | British skirmisher in a shortened green-tinted jacket instead of full red, no crossbelts for speed, small round cap instead of tricorn, carrying a lighter fusil musket at the hip, leather gaiters for quick movement through brush, pouch of loose ammunition, crouched low and moving fast through terrain |
-| Tank | Grenadier | Massive British grenadier in full scarlet coat with a tall black bearskin mitre cap adding another foot of height, thick white shoulder wings on the coat, match case and grenade pouch on the belt, heavy brass-hilted short sword on the hip, carrying a musket in one hand, broad shoulders, barrel chest, the biggest and strongest men in the regiment |
-| Swarm | Drummer Boys | Small boy in a miniature scarlet uniform coat with elaborate white lacing on the chest, wearing a round cap, carrying a field drum strapped to the waist beating a marching cadence with two wooden sticks, too young for combat but keeping time for the line, serious face |
-| Boss | **King George III** | The King himself in full royal regalia over military dress, scarlet coat dripping with gold braid and medals, ermine-trimmed purple velvet cape flowing behind, golden crown sitting atop a white powdered wig, holding a jeweled scepter in one hand and a ceremonial sword in the other, silk stockings and buckled shoes, walking with absurd regal confidence straight into a battlefield he has no business being on. 32×32 sprite |
