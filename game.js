@@ -263,8 +263,6 @@ function handleGridClick(screenX, screenY) {
 function openGarrisonPanel(bunker) {
   selectedBunkerPos = { col: bunker.col, row: bunker.row };
   renderer.selectedBunker = bunker;
-  lastGarrisonCash = -1; // Force refresh on open
-
   closeGarrisonPanel();
 
   garrisonPanel = document.createElement('div');
@@ -408,7 +406,6 @@ function closeGarrisonPanel() {
   }
   selectedBunkerPos = null;
   renderer.selectedBunker = null;
-  lastGarrisonCash = -1;
 }
 
 // Game over screen
