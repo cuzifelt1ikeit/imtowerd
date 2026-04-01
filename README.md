@@ -37,11 +37,11 @@ Inspired by StarCraft custom tower defense maps.
 ### Enemy Types
 | Enemy | HP | Speed | Leak Damage | Visual |
 |-------|-----|-------|-------------|--------|
-| Grunt | Low | Normal | 1 HP | Red circle |
-| Runner | Very Low | Fast | 2 HP | Orange, small |
-| Tank | High | Slow | 5 HP | Purple, large |
-| Swarm | Tiny | Fast | 0.5 HP | Orange, tiny |
-| Boss | Massive | Slow | 20 HP | Dark red, huge |
+| Grunt | Low | Normal | 1 HP | Purple circle |
+| Runner | Very Low | Fast | 2 HP | Golden yellow, small |
+| Tank | High | Slow | 5 HP | Red, large |
+| Swarm | Tiny | Fast | 0.5 HP | Green, tiny |
+| Boss | Massive | Slow | 20 HP | Blue, huge |
 
 ### Enemy Intelligence
 Not all enemies are smart. Each wave has a mix of:
