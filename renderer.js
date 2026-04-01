@@ -467,7 +467,7 @@ export class Renderer {
           for (let i = 0; i < 5; i++) {
             const a = angle + (i - 2) * (spreadAngle / 4);
             const len = dist * (0.7 + Math.random() * 0.3);
-            const pelletLen = cs * 0.15; // short pellet dash
+            const pelletLen = cs * 0.3; // pellet dash length
             // Draw pellet as a short dash near the end of its travel
             const endX = fx + Math.cos(a) * len;
             const endY = fy + Math.sin(a) * len;
