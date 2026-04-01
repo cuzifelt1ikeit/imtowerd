@@ -427,15 +427,28 @@ export class Renderer {
         ctx.shadowBlur = 10;
 
         if (proj.unitType === 'machinegun') {
-          // MG: Rapid thin tracer lines with slight spread
+          // MG: Dashed burst tracer  - - -  with slight spread
           const spread = (Math.random() - 0.5) * cs * 0.15;
-          ctx.beginPath();
-          ctx.moveTo(fx, fy);
-          ctx.lineTo(tx + spread, ty + spread);
+          const dx = (tx + spread) - fx;
+          const dy = (ty + spread) - fy;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          const angle = Math.atan2(dy, dx);
+          const dashLen = cs * 0.12;
+          const gapLen = cs * 0.1;
+          const segmentLen = dashLen + gapLen;
+          const numDashes = Math.floor(dist / segmentLen);
+
           ctx.strokeStyle = proj.color;
-          ctx.lineWidth = 1;
+          ctx.lineWidth = 1.5;
           ctx.globalAlpha = alpha;
-          ctx.stroke();
+          for (let i = 0; i < numDashes; i++) {
+            const startD = i * segmentLen;
+            const endD = startD + dashLen;
+            ctx.beginPath();
+            ctx.moveTo(fx + Math.cos(angle) * startD, fy + Math.sin(angle) * startD);
+            ctx.lineTo(fx + Math.cos(angle) * endD, fy + Math.sin(angle) * endD);
+            ctx.stroke();
+          }
           // Small spark at impact
           ctx.beginPath();
           ctx.arc(tx + spread, ty + spread, 2, 0, Math.PI * 2);
@@ -444,19 +457,25 @@ export class Renderer {
           ctx.globalAlpha = 1;
 
         } else if (proj.unitType === 'shotgun') {
-          // SG: Fan of 4 short thick lines in a cone
+          // SG: Fan of 5 short pellet dashes fanning out in a cone
           const angle = Math.atan2(ty - fy, tx - fx);
-          const spreadAngle = 0.4; // ~23 degrees each side
+          const spreadAngle = 0.45;
           const dist = Math.sqrt((tx - fx) ** 2 + (ty - fy) ** 2);
+          ctx.strokeStyle = proj.color;
+          ctx.lineWidth = 2.5;
           ctx.globalAlpha = alpha;
-          for (let i = 0; i < 4; i++) {
-            const a = angle + (i - 1.5) * (spreadAngle / 2);
+          for (let i = 0; i < 5; i++) {
+            const a = angle + (i - 2) * (spreadAngle / 4);
             const len = dist * (0.7 + Math.random() * 0.3);
+            const pelletLen = cs * 0.15; // short pellet dash
+            // Draw pellet as a short dash near the end of its travel
+            const endX = fx + Math.cos(a) * len;
+            const endY = fy + Math.sin(a) * len;
+            const startX = endX - Math.cos(a) * pelletLen;
+            const startY = endY - Math.sin(a) * pelletLen;
             ctx.beginPath();
-            ctx.moveTo(fx, fy);
-            ctx.lineTo(fx + Math.cos(a) * len, fy + Math.sin(a) * len);
-            ctx.strokeStyle = proj.color;
-            ctx.lineWidth = 3;
+            ctx.moveTo(startX, startY);
+            ctx.lineTo(endX, endY);
             ctx.stroke();
           }
           // Shockwave circle at impact
