@@ -96,14 +96,37 @@ const LEAK_DAMAGE = {
 let garrisonPanel = null;
 let selectedBunkerPos = null;
 
-/** Refresh the garrison panel if it's open (call whenever cash changes) */
-let lastGarrisonCash = -1;
+/**
+ * Lightweight refresh — updates button styles without rebuilding DOM.
+ * Called every frame from the game loop so the panel always reflects current cash.
+ */
 function refreshGarrison() {
-  if (!garrisonPanel || !selectedBunkerPos) return;
-  if (cash === lastGarrisonCash) return; // No change, skip
-  lastGarrisonCash = cash;
-  const bunker = bunkerManager.getBunker(selectedBunkerPos.col, selectedBunkerPos.row);
-  if (bunker) renderGarrisonPanel(bunker);
+  if (!garrisonPanel) return;
+
+  // Update buy button styles
+  garrisonPanel.querySelectorAll('.unit-buy-btn').forEach(btn => {
+    const type = btn.dataset.type;
+    const def = UNIT_TYPES[type];
+    const canAfford = cash >= def.cost;
+    btn.style.borderColor = canAfford ? def.color : '#444';
+    btn.style.background = canAfford ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.03)';
+    btn.style.color = canAfford ? '#fff' : '#666';
+    btn.style.cursor = canAfford ? 'pointer' : 'not-allowed';
+  });
+
+  // Update upgrade button styles
+  garrisonPanel.querySelectorAll('.unit-upg-btn').forEach(btn => {
+    const idx = parseInt(btn.dataset.index);
+    const bunker = selectedBunkerPos ? bunkerManager.getBunker(selectedBunkerPos.col, selectedBunkerPos.row) : null;
+    if (!bunker || !bunker.units[idx]) return;
+    const unit = bunker.units[idx];
+    const upgCost = getUpgradeCost(unit.type, unit.tier);
+    const canAfford = cash >= upgCost;
+    btn.style.borderColor = canAfford ? '#4CAF50' : '#444';
+    btn.style.background = canAfford ? 'rgba(76,175,80,0.2)' : 'rgba(255,255,255,0.03)';
+    btn.style.color = canAfford ? '#4CAF50' : '#666';
+    btn.style.cursor = canAfford ? 'pointer' : 'not-allowed';
+  });
 }
 
 function updatePath() {
