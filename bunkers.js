@@ -270,14 +270,20 @@ export class Bunker {
           closestEnemy.takeDamage(unit.damage);
         }
 
-        // Create a visual projectile line (purely cosmetic — damage is instant)
+        // Create a visual projectile (purely cosmetic — damage is instant)
+        // Unit dot positions inside bunker (matches renderer 2x2 grid)
+        const dotPositions = [[0.3, 0.3], [0.7, 0.3], [0.3, 0.7], [0.7, 0.7]];
+        const unitIndex = this.units.indexOf(unit);
+        const [dotX, dotY] = dotPositions[unitIndex] || [0.5, 0.5];
+
         projectiles.push({
-          fromX: this.col,
-          fromY: this.row,
+          fromX: this.col + dotX - 0.5,     // Offset from cell center
+          fromY: this.row + dotY - 0.5,
           toX: closestEnemy.x,
           toY: closestEnemy.y,
           color: def.color,
-          life: 0.15,                       // How long the line stays visible (seconds)
+          unitType: unit.type,               // For renderer to pick visual style
+          life: unit.type === 'sniper' ? 0.3 : unit.type === 'flamethrower' ? 0.2 : 0.12,
           splash: def.splash,
           splashRadius: def.splashRadius || 0,
         });

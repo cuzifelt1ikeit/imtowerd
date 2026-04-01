@@ -414,35 +414,124 @@ export class Renderer {
       }
     }
 
-    // Draw projectiles
+    // Draw projectiles — each weapon type has a distinct visual
     if (this.bunkerManager) {
       for (const proj of this.bunkerManager.projectiles) {
         const fx = this.offsetX + proj.fromX * cs + cs / 2;
         const fy = proj.fromY * cs + cs / 2;
         const tx = this.offsetX + proj.toX * cs + cs / 2;
         const ty = proj.toY * cs + cs / 2;
+        const alpha = Math.min(1, proj.life / 0.08);
 
         ctx.shadowColor = proj.color;
         ctx.shadowBlur = 10;
-        ctx.beginPath();
-        ctx.moveTo(fx, fy);
-        ctx.lineTo(tx, ty);
-        ctx.strokeStyle = proj.color;
-        ctx.lineWidth = 2;
-        ctx.globalAlpha = Math.min(1, proj.life / 0.08);
-        ctx.stroke();
-        ctx.globalAlpha = 1;
 
-        // Splash circle
-        if (proj.splash && proj.splashRadius > 0) {
+        if (proj.unitType === 'machinegun') {
+          // MG: Rapid thin tracer lines with slight spread
+          const spread = (Math.random() - 0.5) * cs * 0.15;
           ctx.beginPath();
-          ctx.arc(tx, ty, proj.splashRadius * cs, 0, Math.PI * 2);
+          ctx.moveTo(fx, fy);
+          ctx.lineTo(tx + spread, ty + spread);
           ctx.strokeStyle = proj.color;
-          ctx.globalAlpha = Math.min(0.4, proj.life / 0.1);
           ctx.lineWidth = 1;
+          ctx.globalAlpha = alpha;
+          ctx.stroke();
+          // Small spark at impact
+          ctx.beginPath();
+          ctx.arc(tx + spread, ty + spread, 2, 0, Math.PI * 2);
+          ctx.fillStyle = '#ffffff';
+          ctx.fill();
+          ctx.globalAlpha = 1;
+
+        } else if (proj.unitType === 'shotgun') {
+          // SG: Fan of 4 short thick lines in a cone
+          const angle = Math.atan2(ty - fy, tx - fx);
+          const spreadAngle = 0.4; // ~23 degrees each side
+          const dist = Math.sqrt((tx - fx) ** 2 + (ty - fy) ** 2);
+          ctx.globalAlpha = alpha;
+          for (let i = 0; i < 4; i++) {
+            const a = angle + (i - 1.5) * (spreadAngle / 2);
+            const len = dist * (0.7 + Math.random() * 0.3);
+            ctx.beginPath();
+            ctx.moveTo(fx, fy);
+            ctx.lineTo(fx + Math.cos(a) * len, fy + Math.sin(a) * len);
+            ctx.strokeStyle = proj.color;
+            ctx.lineWidth = 3;
+            ctx.stroke();
+          }
+          // Shockwave circle at impact
+          ctx.beginPath();
+          ctx.arc(tx, ty, cs * 0.2 * (1 - alpha + 0.3), 0, Math.PI * 2);
+          ctx.strokeStyle = proj.color;
+          ctx.lineWidth = 1.5;
+          ctx.stroke();
+          ctx.globalAlpha = 1;
+
+        } else if (proj.unitType === 'flamethrower') {
+          // FT: Cone-shaped particle wash, no lines
+          const angle = Math.atan2(ty - fy, tx - fx);
+          const dist = Math.sqrt((tx - fx) ** 2 + (ty - fy) ** 2);
+          ctx.globalAlpha = alpha * 0.6;
+          // Draw 6 flame particles in a cone
+          for (let i = 0; i < 6; i++) {
+            const spread = (Math.random() - 0.5) * 0.8;
+            const a = angle + spread;
+            const d = dist * (0.3 + Math.random() * 0.7);
+            const px = fx + Math.cos(a) * d;
+            const py = fy + Math.sin(a) * d;
+            const r = cs * (0.06 + Math.random() * 0.1);
+            ctx.beginPath();
+            ctx.arc(px, py, r, 0, Math.PI * 2);
+            // Gradient from orange core to red edge
+            ctx.fillStyle = Math.random() > 0.5 ? proj.color : '#ff6600';
+            ctx.fill();
+          }
+          // Burn glow on ground at target
+          if (proj.splash && proj.splashRadius > 0) {
+            ctx.beginPath();
+            ctx.arc(tx, ty, proj.splashRadius * cs * 0.6, 0, Math.PI * 2);
+            ctx.fillStyle = 'rgba(255, 80, 0, 0.15)';
+            ctx.fill();
+          }
+          ctx.globalAlpha = 1;
+
+        } else if (proj.unitType === 'sniper') {
+          // SN: Single bright thin line that lingers, flash at impact
+          ctx.beginPath();
+          ctx.moveTo(fx, fy);
+          ctx.lineTo(tx, ty);
+          ctx.strokeStyle = proj.color;
+          ctx.lineWidth = 1.5;
+          ctx.globalAlpha = alpha;
+          ctx.stroke();
+          // Bright flash at impact point
+          const flashAlpha = Math.min(1, proj.life / 0.15);
+          ctx.beginPath();
+          ctx.arc(tx, ty, cs * 0.15 * flashAlpha, 0, Math.PI * 2);
+          ctx.fillStyle = '#ffffff';
+          ctx.globalAlpha = flashAlpha * 0.8;
+          ctx.fill();
+          // Outer glow ring
+          ctx.beginPath();
+          ctx.arc(tx, ty, cs * 0.25 * flashAlpha, 0, Math.PI * 2);
+          ctx.strokeStyle = proj.color;
+          ctx.lineWidth = 1;
+          ctx.globalAlpha = flashAlpha * 0.4;
+          ctx.stroke();
+          ctx.globalAlpha = 1;
+
+        } else {
+          // Fallback: simple line
+          ctx.beginPath();
+          ctx.moveTo(fx, fy);
+          ctx.lineTo(tx, ty);
+          ctx.strokeStyle = proj.color;
+          ctx.lineWidth = 2;
+          ctx.globalAlpha = alpha;
           ctx.stroke();
           ctx.globalAlpha = 1;
         }
+
         ctx.shadowBlur = 0;
       }
     }
