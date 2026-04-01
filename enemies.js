@@ -282,11 +282,11 @@ export class Enemy {
 // Visual and base stat config for each enemy type.
 // HP and speed are modified by wave scaling before spawning.
 export const ENEMY_TYPES = {
-  grunt:  { hp: 50,  speed: 1.5, color: '#e74c3c', size: 0.6 },   // Standard — red
-  runner: { hp: 25,  speed: 3.0, color: '#f39c12', size: 0.45 },  // Fast, fragile — orange
-  tank:   { hp: 200, speed: 0.8, color: '#8e44ad', size: 0.8 },   // Slow, beefy — purple
-  swarm:  { hp: 15,  speed: 2.0, color: '#e67e22', size: 0.35 },  // Tiny, many — dark orange
-  boss:   { hp: 500, speed: 0.6, color: '#c0392b', size: 0.95 },  // Huge, deadly — dark red
+  grunt:  { hp: 50,  speed: 1.5, color: '#8e44ad', size: 0.6 },   // Standard — purple
+  runner: { hp: 25,  speed: 3.0, color: '#f1c40f', size: 0.45 },  // Fast, fragile — golden yellow
+  tank:   { hp: 200, speed: 0.8, color: '#e74c3c', size: 0.8 },   // Slow, beefy — red
+  swarm:  { hp: 15,  speed: 2.0, color: '#2ecc71', size: 0.35 },  // Tiny, many — green
+  boss:   { hp: 500, speed: 0.6, color: '#3498db', size: 0.95 },  // Huge, deadly — blue
 };
 
 // ── Visual Effects Manager ───────────────────────────────────────
