@@ -24,23 +24,23 @@ import { ENEMY_TYPES } from './enemies.js';
 import { UNIT_TYPES } from './bunkers.js';
 
 const COLORS = {
-  background: '#000000',
-  gridLine: '#0a2a4a',
-  empty: '#050510',
-  bunker: '#1a1a2a',
-  bunkerBorder: '#00ffff',
-  spawn: '#001a00',
-  spawnBorder: '#00ff41',
-  exit: '#1a0000',
-  exitBorder: '#ff0040',
-  path: 'rgba(0, 255, 65, 0.12)',
-  pathLine: 'rgba(0, 255, 65, 0.7)',
-  validPlace: 'rgba(0, 255, 65, 0.25)',
-  invalidPlace: 'rgba(255, 0, 64, 0.25)',
-  hover: 'rgba(0, 255, 255, 0.15)',
-  hpBarBg: 'rgba(0, 0, 0, 0.7)',
-  hpBarFill: '#00ff41',
-  hpBarLow: '#ff0040',
+  background: '#1a1a2e',
+  gridLine: '#2a2a4a',
+  empty: '#16213e',
+  bunker: '#555555',
+  bunkerBorder: '#888888',
+  spawn: '#1b4332',
+  spawnBorder: '#2d6a4f',
+  exit: '#4a1525',
+  exitBorder: '#7a2540',
+  path: 'rgba(76, 175, 80, 0.25)',
+  pathLine: 'rgba(76, 175, 80, 0.6)',
+  validPlace: 'rgba(76, 175, 80, 0.3)',
+  invalidPlace: 'rgba(255, 50, 50, 0.3)',
+  hover: 'rgba(255, 255, 255, 0.15)',
+  hpBarBg: 'rgba(0, 0, 0, 0.5)',
+  hpBarFill: '#2ecc71',
+  hpBarLow: '#e74c3c',
 };
 
 export class Renderer {
@@ -185,36 +185,25 @@ export class Renderer {
         ctx.fillStyle = fillColor;
         ctx.fillRect(x + p, y + p, cs - p * 2, cs - p * 2);
 
-        // Border — neon glow for bunkers, spawn, exit
-        if (cell === CELL_BUNKER || cell === CELL_SPAWN || cell === CELL_EXIT) {
-          ctx.shadowColor = borderColor;
-          ctx.shadowBlur = 8;
-        }
+        // Border
         ctx.strokeStyle = borderColor;
         ctx.lineWidth = 1;
         ctx.strokeRect(x + p, y + p, cs - p * 2, cs - p * 2);
-        ctx.shadowBlur = 0;
 
         // Spawn label
         if (cell === CELL_SPAWN && r === 0) {
-          ctx.fillStyle = '#00ff41';
-          ctx.shadowColor = '#00ff41';
-          ctx.shadowBlur = 6;
+          ctx.fillStyle = '#4CAF50';
           ctx.font = '10px sans-serif';
           ctx.textAlign = 'center';
           ctx.fillText('▼', x + cs / 2, y + cs / 2 + 4);
-          ctx.shadowBlur = 0;
         }
 
         // Exit label
         if (cell === CELL_EXIT) {
-          ctx.fillStyle = '#ff0040';
-          ctx.shadowColor = '#ff0040';
-          ctx.shadowBlur = 6;
+          ctx.fillStyle = '#ff6b6b';
           ctx.font = '10px sans-serif';
           ctx.textAlign = 'center';
           ctx.fillText('✕', x + cs / 2, y + cs / 2 + 4);
-          ctx.shadowBlur = 0;
         }
       }
     }
@@ -229,12 +218,10 @@ export class Renderer {
         ctx.fillRect(x + p, y + p, cs - p * 2, cs - p * 2);
       }
 
-      // Path line — neon glow
+      // Path line
       ctx.beginPath();
       ctx.strokeStyle = COLORS.pathLine;
-      ctx.shadowColor = '#00ff41';
-      ctx.shadowBlur = 10;
-      ctx.lineWidth = 2;
+      ctx.lineWidth = 3;
       ctx.lineJoin = 'round';
       ctx.lineCap = 'round';
 
@@ -245,7 +232,6 @@ export class Renderer {
         else ctx.lineTo(px, py);
       }
       ctx.stroke();
-      ctx.shadowBlur = 0;
     }
 
     // Draw unit indicators on bunkers
@@ -295,16 +281,13 @@ export class Renderer {
         const sx = this.offsetX + this.selectedBunker.col * cs + cs / 2;
         const sy = this.selectedBunker.row * cs + cs / 2;
 
-        ctx.shadowColor = '#00ffff';
-        ctx.shadowBlur = 8;
         ctx.beginPath();
         ctx.arc(sx, sy, range * cs, 0, Math.PI * 2);
-        ctx.strokeStyle = 'rgba(0, 255, 255, 0.4)';
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
         ctx.lineWidth = 1;
         ctx.setLineDash([4, 4]);
         ctx.stroke();
         ctx.setLineDash([]);
-        ctx.shadowBlur = 0;
       }
     }
 
@@ -338,18 +321,14 @@ export class Renderer {
         ctx.fill();
       }
 
-      // Enemy body — neon glow
-      const enemyColor = enemy.hitFlash > 0 ? '#ffffff' : typeDef.color;
-      ctx.shadowColor = enemyColor;
-      ctx.shadowBlur = 12;
+      // Enemy body
       ctx.beginPath();
       ctx.arc(ex, ey, radius, 0, Math.PI * 2);
-      ctx.fillStyle = enemyColor;
+      ctx.fillStyle = enemy.hitFlash > 0 ? '#ffffff' : typeDef.color;
       ctx.fill();
-      ctx.strokeStyle = enemyColor;
-      ctx.lineWidth = 1;
+      ctx.strokeStyle = 'rgba(0,0,0,0.4)';
+      ctx.lineWidth = 2;
       ctx.stroke();
-      ctx.shadowBlur = 0;
 
       // Burn indicator (DOT active)
       if (enemy.dots.length > 0) {
@@ -390,15 +369,12 @@ export class Renderer {
         const py = p.y * cs + cs / 2;
         const alpha = p.life / p.maxLife;
 
-        ctx.shadowColor = p.color;
-        ctx.shadowBlur = 8;
         ctx.beginPath();
         ctx.arc(px, py, p.size * alpha, 0, Math.PI * 2);
         ctx.fillStyle = p.color;
         ctx.globalAlpha = alpha;
         ctx.fill();
         ctx.globalAlpha = 1;
-        ctx.shadowBlur = 0;
       }
 
       // Damage numbers
@@ -408,14 +384,11 @@ export class Renderer {
         const alpha = d.life / d.maxLife;
 
         ctx.globalAlpha = alpha;
-        ctx.fillStyle = '#ff0040';
-        ctx.shadowColor = '#ff0040';
-        ctx.shadowBlur = 6;
+        ctx.fillStyle = '#ff6b6b';
         ctx.font = `bold ${Math.max(10, cs * 0.2)}px sans-serif`;
         ctx.textAlign = 'center';
         ctx.fillText(d.text, dx, dy);
         ctx.globalAlpha = 1;
-        ctx.shadowBlur = 0;
       }
     }
 
@@ -427,8 +400,6 @@ export class Renderer {
         const tx = this.offsetX + proj.toX * cs + cs / 2;
         const ty = proj.toY * cs + cs / 2;
 
-        ctx.shadowColor = proj.color;
-        ctx.shadowBlur = 10;
         ctx.beginPath();
         ctx.moveTo(fx, fy);
         ctx.lineTo(tx, ty);
@@ -448,7 +419,6 @@ export class Renderer {
           ctx.stroke();
           ctx.globalAlpha = 1;
         }
-        ctx.shadowBlur = 0;
       }
     }
 
