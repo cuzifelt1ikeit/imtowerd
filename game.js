@@ -97,11 +97,18 @@ let garrisonPanel = null;
 let selectedBunkerPos = null;
 
 /** Refresh the garrison panel if it's open (call whenever cash changes) */
+let garrisonRefreshPending = false;
 function refreshGarrison() {
-  if (garrisonPanel && selectedBunkerPos) {
-    const bunker = bunkerManager.getBunker(selectedBunkerPos.col, selectedBunkerPos.row);
-    if (bunker) renderGarrisonPanel(bunker);
-  }
+  if (!garrisonPanel || !selectedBunkerPos) return;
+  if (garrisonRefreshPending) return;
+  garrisonRefreshPending = true;
+  requestAnimationFrame(() => {
+    garrisonRefreshPending = false;
+    if (garrisonPanel && selectedBunkerPos) {
+      const bunker = bunkerManager.getBunker(selectedBunkerPos.col, selectedBunkerPos.row);
+      if (bunker) renderGarrisonPanel(bunker);
+    }
+  });
 }
 
 function updatePath() {
@@ -299,14 +306,14 @@ function renderGarrisonPanel(bunker) {
   // Add unit buttons
   if (bunker.units.length < bunker.maxUnits) {
     html += `<div style="font-size:13px; color:#aaa; margin-bottom:6px;">Add Unit:</div>`;
-    html += `<div style="display:flex; flex-wrap:wrap; gap:6px;">`;
+    html += `<div style="display:grid; grid-template-columns:1fr 1fr; gap:6px;">`;
     for (const [type, def] of Object.entries(UNIT_TYPES)) {
       const canAfford = cash >= def.cost;
       html += `<button class="unit-buy-btn" data-type="${type}" style="
         padding: 8px 12px; border-radius: 6px; border: 1px solid ${canAfford ? def.color : '#444'};
         background: ${canAfford ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.03)'};
         color: ${canAfford ? '#fff' : '#666'}; cursor: ${canAfford ? 'pointer' : 'not-allowed'};
-        font-size: 12px; flex: 1; min-width: 65px; text-align: center;
+        font-size: 12px; text-align: center;
       ">
         <div style="font-weight:bold;">${def.shortName}</div>
         <div style="font-size:11px;">$${def.cost}</div>
