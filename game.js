@@ -97,18 +97,13 @@ let garrisonPanel = null;
 let selectedBunkerPos = null;
 
 /** Refresh the garrison panel if it's open (call whenever cash changes) */
-let garrisonRefreshPending = false;
+let lastGarrisonCash = -1;
 function refreshGarrison() {
   if (!garrisonPanel || !selectedBunkerPos) return;
-  if (garrisonRefreshPending) return;
-  garrisonRefreshPending = true;
-  requestAnimationFrame(() => {
-    garrisonRefreshPending = false;
-    if (garrisonPanel && selectedBunkerPos) {
-      const bunker = bunkerManager.getBunker(selectedBunkerPos.col, selectedBunkerPos.row);
-      if (bunker) renderGarrisonPanel(bunker);
-    }
-  });
+  if (cash === lastGarrisonCash) return; // No change, skip
+  lastGarrisonCash = cash;
+  const bunker = bunkerManager.getBunker(selectedBunkerPos.col, selectedBunkerPos.row);
+  if (bunker) renderGarrisonPanel(bunker);
 }
 
 function updatePath() {
@@ -241,6 +236,7 @@ function handleGridClick(screenX, screenY) {
 function openGarrisonPanel(bunker) {
   selectedBunkerPos = { col: bunker.col, row: bunker.row };
   renderer.selectedBunker = bunker;
+  lastGarrisonCash = -1; // Force refresh on open
 
   closeGarrisonPanel();
 
@@ -382,6 +378,7 @@ function closeGarrisonPanel() {
   }
   selectedBunkerPos = null;
   renderer.selectedBunker = null;
+  lastGarrisonCash = -1;
 }
 
 // Game over screen
@@ -526,6 +523,9 @@ function gameLoop(timestamp) {
   if (!gameOver) {
     waveManager.update(dt);
     bunkerManager.update(dt, waveManager.enemies);
+
+    // Keep garrison panel in sync with cash changes
+    refreshGarrison();
 
     if (waveManager.waitingForPlayer) {
       waveTimerEl.textContent = `Build your maze, then start!`;
