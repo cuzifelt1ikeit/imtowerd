@@ -23,7 +23,7 @@ body {
   justify-content: space-between;
   align-items: center;
   padding: 8px 16px;
-  background: rgba(0, 0, 0, 0.75);
+  background: rgba(0, 0, 0, 0.5);
   color: white;
   font-size: 16px;
   z-index: 10;
@@ -64,7 +64,7 @@ canvas {
   justify-content: center;
   padding: 10px;
   padding-bottom: calc(10px + env(safe-area-inset-bottom, 0px));
-  background: rgba(0, 0, 0, 0.85);
+  background: rgba(0, 0, 0, 0.5);
   z-index: 10;
 }
 
