@@ -40,6 +40,18 @@ export const UNIT_TYPES = {
     dot: false,
     coneAngle: 0,
   },
+  sniper: {
+    name: 'Sniper',
+    shortName: 'SN',
+    cost: 50,
+    damage: 40,          // Massive single-hit damage
+    fireRate: 0.8,       // Very slow (less than 1 shot per second)
+    range: 4.0,          // Longest range in the game
+    color: '#2ecc71',    // Green
+    splash: false,       // Single target only
+    dot: false,
+    coneAngle: 0,
+  },
   flamethrower: {
     name: 'Flamethrower',
     shortName: 'FT',
@@ -53,18 +65,6 @@ export const UNIT_TYPES = {
     dot: true,           // Applies a burn effect
     dotDamage: 3,        // Burn damage per second
     dotDuration: 2,      // Burn lasts 2 seconds
-    coneAngle: 0,
-  },
-  sniper: {
-    name: 'Sniper',
-    shortName: 'SN',
-    cost: 50,
-    damage: 40,          // Massive single-hit damage
-    fireRate: 0.8,       // Very slow (less than 1 shot per second)
-    range: 4.0,          // Longest range in the game
-    color: '#2ecc71',    // Green
-    splash: false,       // Single target only
-    dot: false,
     coneAngle: 0,
   },
 };
