@@ -12,10 +12,10 @@
  * any instruments itself, but it tells everyone else when and how to play.
  */
 
-import { Grid } from './grid.js';
-import { Renderer } from './renderer.js';
-import { WaveManager } from './enemies.js';
-import { BunkerManager, UNIT_TYPES, MAX_TIER, getUpgradeCost } from './bunkers.js';
+import { Grid } from './grid.js?v=20';
+import { Renderer } from './renderer.js?v=20';
+import { WaveManager } from './enemies.js?v=20';
+import { BunkerManager, UNIT_TYPES, MAX_TIER, getUpgradeCost } from './bunkers.js?v=20';
 
 // ── Initialize Core Systems ──────────────────────────────────────
 // Grid: 9 columns wide (max 8 bunkers across = always 1 gap), 20 rows tall
@@ -102,6 +102,10 @@ let selectedBunkerPos = null;
  */
 function refreshGarrison() {
   if (!garrisonPanel) return;
+
+  // Update cash display in panel header
+  const cashBadge = garrisonPanel.querySelector('#panel-cash');
+  if (cashBadge) cashBadge.textContent = `💰 ${cash}`;
 
   // Update buy button styles
   garrisonPanel.querySelectorAll('.unit-buy-btn').forEach(btn => {
@@ -281,7 +285,10 @@ function renderGarrisonPanel(bunker) {
 
   let html = `<div id="close-panel" style="display:flex; justify-content:space-between; align-items:center; font-weight:bold; font-size:16px; margin-bottom:10px; cursor:pointer; padding:4px 0;">
     <span>🏰 Bunker (${bunker.units.length}/${bunker.maxUnits})</span>
-    <span style="font-size:20px; padding:4px 8px;">✕</span>
+    <span style="display:flex; align-items:center; gap:8px;">
+      <span id="panel-cash" style="font-size:12px; color:#ffff00;">${'💰 ' + cash}</span>
+      <span style="font-size:20px; padding:4px 8px;">✕</span>
+    </span>
   </div>`;
 
   // Current garrison with upgrade buttons
